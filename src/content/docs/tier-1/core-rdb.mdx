@@ -190,7 +190,7 @@ import { Tabs, TabItem } from "@astrojs/starlight/components";
 
 1. そもそも矛盾が生じるような削除をさせない (デフォルト)
 2. 削除されたユーザーを指していた `posts.creator_id` を `NULL` にする
-3. 作成者が削除された `posts` を削除する
+3. 作成者が削除されたような `posts` をすべて削除する
 
 などがあります。今回は `3` の、ユーザーが削除されたらそのユーザーの作った `posts` もすべて削除するようにしてみましょう。
 
