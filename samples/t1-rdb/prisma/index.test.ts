@@ -1,5 +1,5 @@
+import { expect, test } from "bun:test";
 import * as core from "./core/index.ts";
-import { test, expect } from "bun:test";
 
 test("all functions", async () => {
   await core.reset();

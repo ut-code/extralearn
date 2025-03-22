@@ -1,6 +1,6 @@
+import starlight from "@astrojs/starlight";
 // @ts-check
 import { defineConfig } from "astro/config";
-import starlight from "@astrojs/starlight";
 import starlightThemeRapidePlugin from "starlight-theme-rapide";
 
 // https://astro.build/config
