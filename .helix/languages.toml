@@ -1,0 +1,18 @@
+[language-servers.astro-ls]
+command = "astro-ls"
+args = ["--stdio"]
+config = { contentIntellisense = true }
+
+[[language]]
+name = "astro"
+formatter = { command = "bun", args = ["prettier", "--parser", "astro"] }
+language-servers = ["astro-ls", "tailwindcss-ls"]
+
+[[language]]
+name = "markdown"
+file-types = ["md", "mdx"]
+language-servers = ["astro-ls"]
+[[language]]
+name = "prisma"
+file-types = ["prisma"]
+indent = { tab-width = 2, unit = "  " }

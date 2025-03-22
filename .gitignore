@@ -6,5 +6,8 @@ dist/
 # generated types
 .astro/
 
+# used in samples
+local.db
+
 # env
 .env

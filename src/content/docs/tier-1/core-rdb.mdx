@@ -1,0 +1,246 @@
+---
+title: RDB で複数のオブジェクトの関係を定義する
+---
+
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+
+リレーショナル・データベースでは、名前の通り、複数のものの「関係(リレーション)」を定義することができます。今回は以下のような疑似アプリを考えてみましょう。
+
+- ユーザーがいる
+- ポスト (投稿) がある
+- ユーザーは、ポストを作成できる
+
+## 基礎的なスキーマを定義する
+
+まずは、誰が作ったかの情報を持たせる必要があります。
+
+<Tabs syncKey="orm">
+  <TabItem label="Prisma">
+    ```prisma {9}
+    model User {
+      id    Int    @id @default(autoincrement())
+      name  String
+      posts Post[]
+    }
+    
+    model Post {
+      id        Int    @id @default(autoincrement())
+      creatorId Int
+      content   String
+    }
+    ```
+  </TabItem>
+  <TabItem label="Drizzle">
+    ```ts {8}
+    export const usersTable = sqliteTable("users", {
+      id: integer().primaryKey({ autoIncrement: true }),
+      name: text().notNull(),
+    });
+    
+    export const postsTable = sqliteTable("posts", {
+      id: integer().primaryKey({ autoIncrement: true }),
+      creatorId: integer().notNull(),
+      content: text().notNull(),
+    });
+    ```
+  </TabItem>
+  <TabItem label="SQL">
+    ```sql {8}
+    CREATE TABLE users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL
+    );
+
+    CREATE TABLE posts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      creator_id INTEGER NOT NULL,
+      content TEXT NOT NULL
+    );
+    ```
+  </TabItem>
+</Tabs>
+
+次に、「ポストの `creator_id` (`creatorId`) は存在するユーザーの `id` でなければならない」という制約を追加してみましょう。
+
+<Tabs syncKey="orm">
+  <TabItem label="Prisma">
+    ```prisma {10}
+    model User {
+      id    Int    @id @default(autoincrement())
+      name  String
+      posts Post[]
+    }
+
+    model Post {
+      id        Int    @id @default(autoincrement())
+      creatorId Int
+      creator   User   @relation(fields: [creatorId], references: [id])
+      content   String
+    }
+    ```
+  </TabItem>
+  <TabItem label="Drizzle">
+    ```ts {10}
+    export const usersTable = sqliteTable("users", {
+      id: integer().primaryKey({ autoIncrement: true }),
+      name: text().notNull(),
+    });
+    
+    export const postsTable = sqliteTable("posts", {
+      id: integer().primaryKey({ autoIncrement: true }),
+      creatorId: integer()
+        .notNull()
+        .references(() => usersTable.id),
+      content: text().notNull(),
+    });
+    ```
+  </TabItem>
+  <TabItem label="SQL">
+    ```sql "REFERENCES users(id)"
+    CREATE TABLE users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL
+    );
+
+    CREATE TABLE posts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      creator_id INTEGER NOT NULL REFERENCES users(id),
+      content TEXT NOT NULL
+    );
+    ```
+  </TabItem>
+</Tabs>
+
+これで、次の効果が得られました:
+
+- `post` から作成者をたどるための情報が `creator_id` (`creatorId`) に保存される
+- `post` の `creator_id` (`creatorId`) カラムに「`creator`の`id`に存在する値でなくてはならない」という制約が追加される
+
+## データを取得する
+
+では、データを取得してみましょう。`id = 1` のユーザーの情報をポストと一緒に取ってくることを想定します。
+
+<Tabs syncKey="orm">
+  <TabItem label="Prisma">
+    ```ts {3..5}
+    const user = await prisma.user.findUnique({
+      where: { id: 1 },
+      include: {
+        posts: true,
+      },
+    });
+    ```
+  </TabItem>
+  <TabItem label="Drizzle">
+    <Tabs syncKey="drizzle-kind">
+      <TabItem label="Query API">
+        ```ts {3..8}
+        // schema.ts
+        // schema.ts に以下の文を追加します
+        export const usersRelations = relations(usersTable, ({ many }) => ({
+          posts: many(postsTable),
+        }));
+        export const postsRelations = relations(postsTable, ({ one }) => ({
+          creator: one(usersTable),
+        }));
+        ```
+        ```ts {6..8}
+        import * as schema from "./schema.ts";
+        const db = drizzle({ schema });
+
+        db.query.usersTable.selectFirst({
+          where: eq(usersTable.id, 1),
+          with: {
+            posts: true,
+          }
+        })
+        ```
+      </TabItem>
+      <TabItem label="SQL-like">
+        ```ts {5}
+        const res = await db
+          .select()
+          .from(usersTable)
+          .where(eq(usersTable.id, id))
+          .leftJoin(postsTable, eq(postsTable.creatorId, usersTable.id));
+        ```
+      </TabItem>
+    </Tabs>
+  </TabItem>
+  <TabItem label="SQL">
+    ```sql /LEFT JOIN [^;]+/
+    SELECT * FROM users WHERE users.id = 1 LEFT JOIN posts ON users.id = posts.creator_id;
+    ```
+  </TabItem>
+</Tabs>
+
+## ユーザーの削除に対応する
+
+このままでは、ポストを作成したユーザーが削除できなくなってしまいます。
+
+なぜでしょうか。考えてみましょう。
+
+正解は、 `posts.creator_id` に制約
+
+- `creator`の`id`に存在する値でなくてはならない
+
+があるからです。ポストを作成したユーザーを削除すると、そのポストの `creator_id` が存在しない値を指すようになってしまいます。
+
+これを解決するには複数の方法があり、
+
+1. そもそも矛盾が生じるような削除をさせない (デフォルト)
+2. 削除されたユーザーを指していた `posts.creator_id` を `NULL` にする
+3. 作成者が削除された `posts` を削除する
+
+などがあります。今回は `3` の、ユーザーが削除されたらそのユーザーの作った `posts` もすべて削除するようにしてみましょう。
+
+といってもプログラムの方の変更は必要なく、スキーマを少し変更するだけで達成できます。
+
+<Tabs syncKey="orm">
+  <TabItem label="Prisma">
+    ```prisma "onDelete: Cascade"
+    model User {
+      id    Int    @id @default(autoincrement())
+      name  String
+      posts Post[]
+    }
+
+    model Post {
+      id        Int    @id @default(autoincrement())
+      creatorId Int
+      creator   User   @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+      content   String
+    }
+    ```
+  </TabItem>
+  <TabItem label="Drizzle">
+    ```ts '{ onDelete: "cascade" }'
+    export const usersTable = sqliteTable("users", {
+      id: integer().primaryKey({ autoIncrement: true }),
+      name: text().notNull(),
+    });
+    
+    export const postsTable = sqliteTable("posts", {
+      id: integer().primaryKey({ autoIncrement: true }),
+      creatorId: integer()
+        .notNull()
+        .references(() => usersTable.id, { onDelete: "cascade" }),
+      content: text().notNull(),
+    });
+    ```
+  </TabItem>
+  <TabItem label="SQL">
+    ```sql "ON DELETE CASCADE"
+    CREATE TABLE users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL
+    );
+
+    CREATE TABLE posts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      creator_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      content TEXT NOT NULL
+    );
+    ```
+  </TabItem>
+</Tabs>
