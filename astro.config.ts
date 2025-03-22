@@ -17,10 +17,6 @@ export default defineConfig({
           label: "最重要",
           autogenerate: { directory: "tier-1" },
         },
-        {
-          label: "Reference",
-          autogenerate: { directory: "reference" },
-        },
       ],
     }),
   ],
