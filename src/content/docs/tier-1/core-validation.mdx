@@ -1,0 +1,211 @@
+---
+title: バリデーションとその重要性
+---
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+
+バリデーションは必要！ (TODO: 導入を考える)
+
+# バリデーションをしてみる
+
+では、実際に TypeScript でスキーマを作り、既存のアプリケーションにバリデーションを追加してみよう。
+
+もととなるアプリケーションはこれ。
+ソースコードが欲しい場合は、このドキュメントのリポジトリをクローンして、アプリのあるディレクトリ `exercises/t1-validation.install/` を開いてね。
+
+```ts
+const app = new Hono();
+
+app.patch("/users/:id", async (c) => {
+  const id = Number.parseInt(c.req.param().id);
+  type Body = {
+    password: string;
+    data: { name?: string; password?: string };
+  }
+  const body = (await c.req.json()) as Body;
+
+  const res = await prisma.user.update({
+    where: { id, password: body.password },
+    data: body.data,
+  });
+  return c.json(res, 201);
+});
+```
+
+<Tabs syncKey="validator">
+  <TabItem label="Valibot">
+    ```ts {1} {3..9} "v.parse" "v.number()" "RequestSchema"
+    import * as v from "valibot";
+
+    const RequestSchema = v.object({
+      password: v.string(),
+      data: v.object({
+        name: v.optional(v.string()),
+        password: v.optional(v.string()),
+      }),
+    });
+    app.patch("/users/:id", async (c) => {
+      const id = v.parse(v.number(), Number.parseInt(c.req.param().id));
+      const body = v.parse(RequestSchema, await c.req.json());
+    
+      const res = await prisma.user.update({
+        where: { id, password: body.password },
+        data: body.data,
+      });
+      return c.json(res, 201);
+    });
+    ```
+  </TabItem>
+  <TabItem label="Zod">
+    ```ts {1} {3..9} "RequestSchema.parse" "z.number().parse"
+    import { z } from "zod";
+
+    const RequestSchema = z.object({
+      password: z.string(),
+      data: z.object({
+        name: z.string().optional(),
+        password: z.string().optional(),
+      }),
+    });
+    app.patch("/users/:id", async (c) => {
+      const id = z.number().parse(Number.parseInt(c.req.param().id));
+      const body = RequestSchema.parse(await c.req.json());
+    
+      const res = await prisma.user.update({
+        where: { id, password: body.password },
+        data: body.data,
+      });
+      return c.json(res, 201);
+    });
+    ```
+  </TabItem>
+  <TabItem label="Typia">
+    Typia では型がスキーマの役目を果たすので、すでにある型をそのまま流用できる。
+
+    代わりに、環境構築が少し面倒くさい。
+    公式ドキュメントを参考のこと。
+
+    [https://typia.io/docs/setup/](https://typia.io/docs/setup/)
+    ```ts {1} "typia.assert"
+    import typia from "typia";
+    
+    app.patch("/users/:id", async (c) => {
+      const id = typia.assert<number>(Number.parseInt(c.req.param().id));
+      type Body = {
+        password: string;
+        data: { name?: string; password?: string };
+      };
+      const body = typia.assert<Body>(await c.req.json());
+      const res = await prisma.user.update({
+        where: { id, password: body.password },
+        data: body.data,
+      });
+      return c.json(res, 201);
+    });
+    ```
+  </TabItem>
+</Tabs>
+
+ちなみに、Hono だともっと便利なバリデーターが提供されてるよ。
+
+<Tabs syncKey="validator">
+  <TabItem label="Valibot">
+    ```ts {1} {7} {11..17} 'c.req.valid("param")' 'c.req.valid("json")'
+    import { vValidator } from "@hono/valibot-validator";
+
+    app.patch(
+      "/users/:id",
+      vValidator(
+        "param",
+        v.object({ id: v.pipe(v.string(), v.transform(Number.parseInt)) }),
+      ),
+      vValidator(
+        "json",
+        v.object({
+          password: v.string(),
+          data: v.object({
+            name: v.optional(v.string()),
+            password: v.optional(v.string()),
+          }),
+        }),
+      ),
+      async (c) => {
+        const { id } = c.req.valid("param");
+        const body = c.req.valid("json");
+    
+        const res = await prisma.user.update({
+          where: { id, password: body.password },
+          data: body.data,
+        });
+        return c.json(res, 201);
+      },
+    );
+    ```
+  </TabItem>
+  <TabItem label="Zod">
+    ```ts {1} {8..14} 'c.req.valid("param")' 'c.req.valid("json")'
+    import { zValidator } from "@hono/zod-validator";
+
+    app.patch(
+      "/users/:id",
+      zValidator("param", z.object({ id: z.coerce.number() })),
+      zValidator(
+        "json",
+        z.object({
+          password: z.string(),
+          data: z.object({
+            name: z.string().optional(),
+            password: z.string().optional(),
+          }),
+        }),
+      ),
+      async (c) => {
+        const { id } = c.req.valid("param");
+        const body = c.req.valid("json");
+
+        const res = await prisma.user.update({
+          where: { id, password: body.password },
+          data: body.data,
+        });
+        return c.json(res, 201);
+      },
+    );
+    ```
+  </TabItem>
+  <TabItem label="Typia">
+    ```ts {1} {7..10} 'c.req.valid("json")'
+    import { typiaValidator } from "@hono/typia-validator";
+
+    app.patch(
+      "/users/:id",
+      typiaValidator(
+        "json",
+        typia.createValidate<{
+          password: string;
+          data: { name?: string; password?: string };
+        }>(),
+      ),
+      async (c) => {
+        const id = typia.assert<number>(Number.parseInt(c.req.param().id));
+        const body = c.req.valid("json");
+    
+        const res = await prisma.user.update({
+          where: { id, password: body.password },
+          data: body.data,
+        });
+        return c.json(res, 201);
+      },
+    );
+    ```
+  </TabItem>
+</Tabs>
+
+# 演習問題 (発展)
+
+バリデーションのない脆弱なアプリケーション `exercises/t1-validation.hack-this` をハックしてみよう。
+
+要件は次の２つ。
+
+- `server/` の中は変更しない
+- `bun server` で起動したアプリケーションに対して、パスワードを知らずに、ユーザーの名前を勝手に変える
+
+詳しくはそのディレクトリにある README を見てね。

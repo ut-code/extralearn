@@ -1,0 +1,6 @@
+# bunfig.toml
+preload = ["./preload.ts"]
+
+# for using in tests
+[test]
+preload = ["./preload.ts"]

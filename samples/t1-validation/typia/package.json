@@ -1,0 +1,23 @@
+{
+  "name": "t1-validation-vulnerable-service",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest",
+    "prisma": "^6.5.0",
+    "typia": "^8.0.3",
+    "@ryoppippi/unplugin-typia": "^2.0.3"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@hono/typia-validator": "^0.1.1",
+    "@prisma/client": "^6.5.0",
+    "hono": "^4.7.5"
+  },
+  "scripts": {
+    "dev": "rm server/local.db && bun prisma db push && bun run --watch server/index.ts"
+  }
+}
