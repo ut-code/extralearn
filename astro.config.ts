@@ -20,7 +20,12 @@ export default defineConfig({
       ],
     }),
   ],
+  prefetch: {
+    defaultStrategy: "hover",
+    prefetchAll: true,
+  },
   experimental: {
     contentIntellisense: true,
+    clientPrerender: true,
   },
 });
