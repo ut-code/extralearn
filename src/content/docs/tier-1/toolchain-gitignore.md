@@ -18,7 +18,7 @@ git に「このファイルは git で管理しないでね」と伝えるた�
 
 :::tip[書き方]
 
-```txt[name=".gitignore"]
+```txt title=".gitignore"
 # ハッシュ (#) で始まるものはコメント
 
 # 名前単体で指定すると、「この名前のファイル/ディレクトリはすべて無視」
@@ -36,7 +36,7 @@ node_modules/
 # ! は、「これは例外として含む」と言う意味
 # ここで `.vscode` と指定してしまうとうまく動かないので、 `.vscode/*` と指定してやろう。
 .vscode/*
-!.vscode/settings.json
+!.vscode/extensions.json
 ```
 
 :::
