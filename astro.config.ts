@@ -5,12 +5,13 @@ import starlightThemeRapidePlugin from "starlight-theme-rapide";
 
 // https://astro.build/config
 export default defineConfig({
+  site: "https://extra.utcode.net",
   integrations: [
     starlight({
       title: "My Docs",
       plugins: [starlightThemeRapidePlugin()],
       social: {
-        github: "https://github.com/withastro/starlight",
+        github: "https://github.com/ut-code/extralearn",
       },
       sidebar: [
         {
