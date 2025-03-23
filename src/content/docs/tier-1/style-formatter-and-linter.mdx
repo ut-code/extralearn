@@ -20,7 +20,7 @@ import Option from "../../../components/Option.astro";
 function add(a,b){return a + b}
 ```
 Prettier でフォーマットすれば、
-```
+```sh
 npx prettier main.mjs --write
 ```
 以下のようにとても読みやすくなります。フォーマッターを実行するコマンドの詳細は、各フォーマッターのドキュメントを参照するようにしてください。
@@ -51,7 +51,7 @@ function add(a, b, c) {
 console.log(add(1, 2));
 ```
 適当な設定をした後に、EsLint に何が問題か聞いてみましょう。
-```
+```sh
 npx eslint main.mjs
 ```
 そうすると、
