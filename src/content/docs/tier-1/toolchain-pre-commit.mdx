@@ -21,16 +21,16 @@ mkdir hoge
 cd hoge
 npm init -y
 ```
+.gitignore を作成して、そこに `node_modules` を追加します。
+```
+// .gitignore
+node_modules
+```
 Git でバージョンを管理しましょう。
 ```sh
 git init
 git add .
 git commit -m "init"
-```
-.gitignore を作成して、そこに `node_modules` を追加します。
-```
-// .gitignore
-node_modules
 ```
 次に、Biome のセットアップをしていきます。
 ```sh
@@ -40,6 +40,7 @@ npx @biomejs/biome init
 Lefthook をインストールします。
 ```sh
 npm install --save-dev lefthook
+npx lefthook install
 ```
 `lefthook.yml` というファイルが自動で作成されるので、そこに以下のように書き込みましょう。
 ```yml
@@ -50,7 +51,7 @@ pre-commit:
       glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}"
       run: npx @biomejs/biome check --write {staged_files}
 ``` 
-`setup complete` というコミットを作成します。
+`setup pre-commit` というコミットを作成します。
 ```sh
 git add .
 git commit -m "setup complete"
