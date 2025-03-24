@@ -17,7 +17,7 @@ SQL のデータベースに直接 n to m のリレーションを記述する�
 
 <Tabs syncKey="orm">
   <TabItem label="Prisma">
-    ```prisma
+    ```prisma {15..22}
     model User {
       id    Int    @id @default(autoincrement())
       name  String
@@ -43,20 +43,66 @@ SQL のデータベースに直接 n to m のリレーションを記述する�
     ```
   </TabItem>
   <TabItem label="Drizzle">
-    ```ts '{ onDelete: "cascade" }'
-    export const usersTable = sqliteTable("users", {
-      id: integer().primaryKey({ autoIncrement: true }),
-      name: text().notNull(),
-    });
-    
-    export const postsTable = sqliteTable("posts", {
-      id: integer().primaryKey({ autoIncrement: true }),
-      creatorId: integer()
-        .notNull()
-        .references(() => usersTable.id, { onDelete: "cascade" }),
-      content: text().notNull(),
-    });
-    ```
+    <Tabs syncKey="drizzle-kind">
+      <TabItem label="Query API">
+        ```ts {14..21}
+        export const usersTable = sqliteTable("users", {
+          id: integer().primaryKey({ autoIncrement: true }),
+          name: text().notNull(),
+        });
+        
+        export const postsTable = sqliteTable("posts", {
+          id: integer().primaryKey({ autoIncrement: true }),
+          creatorId: integer("creator_id")
+            .notNull()
+            .references(() => usersTable.id, { onDelete: "cascade" }),
+          content: text().notNull(),
+        });
+        
+        export const likedTable = sqliteTable("liked", {
+          userId: integer("user_id")
+            .notNull()
+            .references(() => usersTable.id, { onDelete: "cascade" }),
+          postId: integer("post_id")
+            .notNull()
+            .references(() => postsTable.id, { onDelete: "cascade" }),
+        });
+        
+        export const usersRelations = relations(usersTable, ({ many }) => ({
+          posts: many(postsTable),
+          liked: many(likedTable),
+        }));
+        
+        export const postsRelations = relations(postsTable, ({ one, many }) => ({
+          creator: one(usersTable, {
+            fields: [postsTable.creatorId],
+            references: [usersTable.id],
+          }),
+          likedBy: many(likedTable),
+        }));
+        
+        export const likedRelaitons = relations(likedTable, ({ one }) => ({
+          user: one(usersTable, {
+            fields: [likedTable.userId],
+            references: [usersTable.id],
+          }),
+          post: one(postsTable, {
+            fields: [likedTable.postId],
+            references: [postsTable.id],
+          }),
+        }));
+        ```
+      </TabItem>
+      <TabItem label="SQL-like">
+        ```ts {5}
+        const res = await db
+          .select()
+          .from(usersTable)
+          .where(eq(usersTable.id, id))
+          .leftJoin(postsTable, eq(postsTable.creatorId, usersTable.id));
+        ```
+      </TabItem>
+    </Tabs>
   </TabItem>
   <TabItem label="SQL">
     ```sql "ON DELETE CASCADE"
