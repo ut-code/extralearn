@@ -1,0 +1,75 @@
+---
+title: pre-commit について
+---
+
+## Gitの復習
+ut.code(); Learn の[GitとGitHubを用いた共同開発](https://learn.utcode.net/docs/web-servers/github/)の章で学習したように、Git を使えば、各コミットごとにどういった変更が行われたのか、後からでも知ることができます。
+ここで、コミットされた後のソースコードが、正しいフォーマットで、かつ品質や潜在的なバグをチェックされたものであることを保証するために、コミットする前にフォーマッターとリンターを実行しましょう。
+その方法についてより具体的に考えていきましょう。
+
+## pre-commitについて
+Git では、`add` や `commit` などのコマンドを実行する前後に自動的にスクリプトを実行することができます。そのスクリプトのことを**フック**といいます。
+そのフックを管理するツールとして、**Lefthook** や **Husky** があります。また、コミットする前に実行されるフックのことを **pre-commit** と言います。
+今回は、pre-commit と言ったら、ツールの名前ではなく、この定義で用いています。
+Lefthook を用いて、pre-commit として Biome のコマンドを実行する方法について勉強していきましょう。
+
+## 演習
+### 環境構築
+まず、`hoge` という名前のディレクトリを作って、そこに `package.json` を作ります。
+```sh
+mkdir hoge
+cd hoge
+npm init -y
+```
+.gitignore を作成して、そこに `node_modules` を追加します。
+```
+// .gitignore
+node_modules
+```
+Git でバージョンを管理しましょう。
+```sh
+git init
+git add .
+git commit -m "init"
+```
+次に、Biome のセットアップをしていきます。
+```sh
+npm install --save-dev @biomejs/biome
+npx @biomejs/biome init
+```
+Lefthook をインストールします。
+```sh
+npm install --save-dev lefthook
+npx lefthook install
+```
+`lefthook.yml` というファイルが自動で作成されるので、そこに以下のように書き込みましょう。
+```yml
+// lefthook.yml
+pre-commit:
+  commands:
+    check:
+      glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}"
+      run: npx @biomejs/biome check --write {staged_files}
+``` 
+`setup pre-commit` というコミットを作成します。
+```sh
+git add .
+git commit -m "setup complete"
+```
+これで環境構築は完了です！それでは実際に使ってみましょう！
+
+### pre-commit 実践
+main.mjs というファイルを作って、適当なコードを書きましょう。
+```js
+//main.mjs
+function add(a, b) {
+	return a + b;
+}
+
+console.log(add(3, 2));
+```
+```sh
+git add .
+git commit -m "define add function"
+```
+コミットを作成するときに、ターミナル上で Lefthook が実行されているのが分かるかと思います。
