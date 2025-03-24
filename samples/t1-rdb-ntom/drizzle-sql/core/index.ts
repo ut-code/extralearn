@@ -21,16 +21,34 @@ export async function getUser(id: number) {
     .select({
       id: usersTable.id,
       name: usersTable.name,
-      post: postsTable,
+      created: postsTable,
     })
     .from(usersTable)
     .leftJoin(postsTable, eq(postsTable.creatorId, usersTable.id))
     .where(eq(usersTable.id, id));
+  const liked = await db
+    .select()
+    .from(postsTable)
+    .where(
+      exists(
+        db
+          .select()
+          .from(likedTable)
+          .where(
+            and(
+              eq(postsTable.id, likedTable.postId),
+              eq(likedTable.userId, id),
+            ),
+          ),
+      ),
+    );
 
   if (!res[0]) throw new Error("user not found");
   return {
-    ...res[0],
-    posts: res.map((user) => user.post).filter((post) => post !== null),
+    id: res[0].id,
+    name: res[0].name,
+    posts: res.map((user) => user.created).filter((post) => post !== null),
+    liked,
   };
 }
 
@@ -62,10 +80,10 @@ export async function getPost(id: number) {
       likedBy_name: likedUsers.name,
     })
     .from(postsTable)
-    .where(eq(postsTable.id, id))
     .leftJoin(creator, eq(creator.id, postsTable.creatorId))
     .leftJoin(likedTable, eq(likedTable.postId, postsTable.id))
-    .leftJoin(likedUsers, eq(likedTable.userId, likedUsers.id));
+    .leftJoin(likedUsers, eq(likedTable.userId, likedUsers.id))
+    .where(eq(postsTable.id, id));
 
   if (!posts[0]) throw new Error("failed to fetch post");
   return {

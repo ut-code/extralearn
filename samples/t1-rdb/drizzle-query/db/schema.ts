@@ -6,10 +6,6 @@ export const usersTable = sqliteTable("users", {
   name: text().notNull(),
 });
 
-export const usersRelations = relations(usersTable, ({ many }) => ({
-  posts: many(postsTable),
-}));
-
 export const postsTable = sqliteTable("posts", {
   id: integer().primaryKey({ autoIncrement: true }),
   creatorId: integer("creator_id")
@@ -17,6 +13,14 @@ export const postsTable = sqliteTable("posts", {
     .references(() => usersTable.id, { onDelete: "cascade" }),
   content: text().notNull(),
 });
+
+export const usersRelations = relations(usersTable, ({ many }) => ({
+  posts: many(postsTable),
+}));
+
 export const postsRelations = relations(postsTable, ({ one }) => ({
-  creator: one(usersTable),
+  creator: one(usersTable, {
+    fields: [postsTable.creatorId],
+    references: [usersTable.id],
+  }),
 }));
