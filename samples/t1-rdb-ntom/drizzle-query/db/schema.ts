@@ -36,7 +36,7 @@ export const postsRelations = relations(postsTable, ({ one, many }) => ({
   likedBy: many(likedTable),
 }));
 
-export const likedRelaitons = relations(likedTable, ({ one }) => ({
+export const likedRelations = relations(likedTable, ({ one }) => ({
   user: one(usersTable, {
     fields: [likedTable.userId],
     references: [usersTable.id],

@@ -50,7 +50,7 @@ SQL のデータベースに直接 n to m のリレーションを記述する�
           id: integer().primaryKey({ autoIncrement: true }),
           name: text().notNull(),
         });
-        
+
         export const postsTable = sqliteTable("posts", {
           id: integer().primaryKey({ autoIncrement: true }),
           creatorId: integer("creator_id")
@@ -58,7 +58,7 @@ SQL のデータベースに直接 n to m のリレーションを記述する�
             .references(() => usersTable.id, { onDelete: "cascade" }),
           content: text().notNull(),
         });
-        
+
         export const likedTable = sqliteTable("liked", {
           userId: integer("user_id")
             .notNull()
@@ -67,12 +67,12 @@ SQL のデータベースに直接 n to m のリレーションを記述する�
             .notNull()
             .references(() => postsTable.id, { onDelete: "cascade" }),
         });
-        
+
         export const usersRelations = relations(usersTable, ({ many }) => ({
           posts: many(postsTable),
           liked: many(likedTable),
         }));
-        
+
         export const postsRelations = relations(postsTable, ({ one, many }) => ({
           creator: one(usersTable, {
             fields: [postsTable.creatorId],
@@ -80,8 +80,8 @@ SQL のデータベースに直接 n to m のリレーションを記述する�
           }),
           likedBy: many(likedTable),
         }));
-        
-        export const likedRelaitons = relations(likedTable, ({ one }) => ({
+
+        export const likedRelations = relations(likedTable, ({ one }) => ({
           user: one(usersTable, {
             fields: [likedTable.userId],
             references: [usersTable.id],
