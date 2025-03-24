@@ -33,16 +33,16 @@ git commit -m "init"
 // .gitignore
 node_modules
 ```
-次に、[公式ドキュメント](https://biomejs.dev/ja/guides/getting-started/)に沿って、Biome のセットアップをしていきます。
+次に、Biome のセットアップをしていきます。
 ```sh
-npm install --save-dev --save-exact @biomejs/biome
+npm install --save-dev @biomejs/biome
 npx @biomejs/biome init
 ```
-公式ドキュメントの[別の章](https://biomejs.dev/ja/recipes/git-hooks/)では、Lefthook の使い方まで説明してくれています！
+Lefthook をインストールします。
 ```sh
 npm install --save-dev lefthook
 ```
-Lefthook をインストールしたら、`lefthook.yml` というファイルが自動で作成されるので、そこに以下のように書き込みましょう。公式ドキュメントとはコマンドを少し変えています。
+`lefthook.yml` というファイルが自動で作成されるので、そこに以下のように書き込みましょう。
 ```yml
 // lefthook.yml
 pre-commit:
