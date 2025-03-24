@@ -56,30 +56,38 @@ export async function getPost(id: number) {
     .select({
       id: postsTable.id,
       content: postsTable.content,
-      creator: creator,
-      likedBy: likedUsers,
+      creator_id: creator.id,
+      creator_name: creator.name,
+      likedBy_id: likedUsers.id,
+      likedBy_name: likedUsers.name,
     })
     .from(postsTable)
     .where(eq(postsTable.id, id))
-    .innerJoin(creator, eq(usersTable.id, postsTable.creatorId))
-    .leftJoin(
-      likedUsers,
-      exists(
-        db
-          .select()
-          .from(likedTable)
-          .where(
-            and(
-              eq(postsTable.id, likedTable.postId),
-              eq(likedTable.userId, likedUsers.id),
-            ),
-          ),
-      ),
-    );
+    .leftJoin(creator, eq(creator.id, postsTable.creatorId))
+    .leftJoin(likedTable, eq(likedTable.postId, postsTable.id))
+    .leftJoin(likedUsers, eq(likedTable.userId, likedUsers.id));
 
   if (!posts[0]) throw new Error("failed to fetch post");
-  if (!posts[0].creator) throw new Error("post's creator doesn't exist");
-  return posts[0];
+  return {
+    id: posts[0].id,
+    content: posts[0].content,
+    creator: {
+      id: posts[0].creator_id,
+      name: posts[0].creator_name,
+    },
+    likedBy: posts
+      .filter((post) => post.likedBy_name !== null)
+      .map((post) => ({
+        name: post.likedBy_name,
+        id: post.likedBy_id,
+      })),
+  };
+}
+export async function like(userId: number, postId: number) {
+  await db.insert(likedTable).values({
+    postId,
+    userId,
+  });
 }
 
 export async function reset() {

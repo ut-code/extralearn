@@ -31,18 +31,14 @@ test("all functions", async () => {
       name: "aster-void",
     },
     content: "Hello,",
-    liked: [
+    likedBy: [
       {
-        user: {
-          id: userId,
-          name: "aster-void",
-        },
+        id: userId,
+        name: "aster-void",
       },
       {
-        user: {
-          id: userId2,
-          name: "another-user",
-        },
+        id: userId2,
+        name: "another-user",
       },
     ],
   });
