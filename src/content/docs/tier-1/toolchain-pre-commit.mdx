@@ -4,8 +4,8 @@ title: pre-commit について
 
 ## Gitの復習
 ut.code(); Learn の[GitとGitHubを用いた共同開発](https://learn.utcode.net/docs/web-servers/github/)の章で学習したように、Git を使えば、各コミットごとにどういった変更が行われたのか、後からでも知ることができます。
-ここで、コミットされた後のソースコードが、正しいフォーマットで、かつ品質や潜在的なバグをチェックされたものであることを保証するために、コミットする前にフォーマッターとリンターを実行しましょう。
-その方法についてより具体的に考えていきましょう。
+コミットする前に[フォーマッターとリンター](https://extra.utcode.net/tier-1/style-formatter-and-linter/)を実行することで、コミットされた後のソースコードが、正しいフォーマットで、かつ品質や潜在的なバグをチェックされたものであることを保証できます。
+その方法についてより具体的に見ていきます。
 
 ## pre-commitについて
 Git では、`add` や `commit` などのコマンドを実行する前後に自動的にスクリプトを実行することができます。そのスクリプトのことを**フック**といいます。
@@ -54,7 +54,7 @@ pre-commit:
 `setup pre-commit` というコミットを作成します。
 ```sh
 git add .
-git commit -m "setup complete"
+git commit -m "setup pre-commit"
 ```
 これで環境構築は完了です！それでは実際に使ってみましょう！
 
