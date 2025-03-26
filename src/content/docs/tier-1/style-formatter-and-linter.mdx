@@ -1,0 +1,102 @@
+---
+title: フォーマッターとリンターの役割と使い方
+---
+
+import MultipleChoice from "../../../components/MultipleChoice.astro";
+import Option from "../../../components/Option.astro";
+
+## フォーマッターの役割と使い方
+フォーマッターは**コードの見た目を自動的に整えるツール**です。
+
+### フォーマッターの例
+- Prettier (JavaScript, TypeScript, Markdown など)
+- Biome (JavaScript, TypeScript, JSX, TSX など)
+- Black (Python)
+- gofmt (Go)
+- rustfmt (Rust)
+
+例えば、以下のようにフォーマットされていないコードも、
+```js 
+// main.mjs
+function add(a,b){return a + b}
+```
+Prettier でフォーマットすれば、
+```sh
+npx prettier main.mjs --write
+```
+以下のようにとても読みやすくなります。フォーマッターを実行するコマンドの詳細は、各フォーマッターのドキュメントを参照するようにしてください。
+```js 
+// main.mjs
+function add(a, b) {
+  return a + b;
+}
+
+```
+
+フォーマッターを実行するコマンドは、開発中に頻繫に使用するので、Makefile や justfile、package.json で定義され、より短いコマンドで実行できるようにすることがしばしばあります。後述するリンターについても同様です。
+
+## リンターの役割と使い方
+リンターは**コードの品質や潜在的なバグをチェックするツール**です。
+### リンターの例
+- ESLint (JavaScript, TypeScript)
+- Biome (JavaScript, TypeScript)
+- Clippy (Rust)
+
+例えば、以下のコードの何が問題でしょうか？
+```js
+// main.mjs
+function add(a, b, c) {
+  const diff = a - b;
+  return a + b
+}
+
+console.log(add(1, 2));
+```
+適当な設定をした後に、EsLint に何が問題か聞いてみましょう。
+```sh
+npx eslint main.mjs
+```
+そうすると、
+```
+  1:20  error  'c' is defined but never used              no-unused-vars
+  2:9   error  'diff' is assigned a value but never used  no-unused-vars
+
+✖ 2 problems (2 errors, 0 warnings)
+```
+このように何行何文字目にどういった問題があるのか教えてくれます。
+
+## フォーマッターやリンターの設定
+フォーマッターやリンターの中には、JSON 形式や YAML 形式で設定を行えるものがあります。
+例えば Biome では、`init` コマンドを実行すると、JSON ファイルが生成され、インデントやクオート等について設定できます。
+
+## 確認テスト
+Q1. フォーマッターとは何ですか？
+
+  <MultipleChoice>
+      <Option isCorrect>
+        コードの見た目を自動的に整えるツール
+      </Option>
+      <Option>
+        コードの品質や潜在的なバグをチェックするツール
+      </Option>
+      <Option>
+        コードの実行にかかる時間を最適化するツール
+      </Option>
+  </MultipleChoice>
+
+Q2. ESLint はどの言語のリンターでしょうか？
+
+  <MultipleChoice>
+      <Option>
+        Go
+      </Option>
+      <Option isCorrect>
+        JavaScript
+      </Option>
+      <Option>
+        Rust
+      </Option>
+  </MultipleChoice>
+
+## 補足
+フォーマッターやリンターは、Git コマンドの実行の前後に pre-commit や CI (Continuous Integration)を用いて実行することがしばしばありますが、その詳細は別の章に譲ります。
