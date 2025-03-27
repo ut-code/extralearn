@@ -22,6 +22,7 @@ export async function getUser(id: number) {
     with: {
       posts: true,
       liked: {
+        columns: {},
         with: {
           post: true,
         },

@@ -25,14 +25,14 @@ model Post {
   creatorId Int
   creator   User    @relation(fields: [creatorId], references: [id], onDelete: Cascade)
   content   String
-  likedBy     Liked[]
+  likedBy   Liked[]
 }
 
 model Liked {
   userId Int
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  postId    Int
-  post      Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId Int
+  post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   @@unique([userId, postId])
 }

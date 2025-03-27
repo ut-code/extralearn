@@ -17,7 +17,6 @@ export async function getUser(id: number) {
   const user = await prisma.user.findUnique({
     where: { id },
     include: {
-      posts: true,
       liked: {
         select: {
           post: true,
