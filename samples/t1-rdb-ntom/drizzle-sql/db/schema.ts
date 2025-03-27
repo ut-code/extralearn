@@ -1,4 +1,3 @@
-import { relations } from "drizzle-orm";
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 export const usersTable = sqliteTable("users", {
@@ -14,13 +13,11 @@ export const postsTable = sqliteTable("posts", {
   content: text().notNull(),
 });
 
-export const usersRelations = relations(usersTable, ({ many }) => ({
-  posts: many(postsTable),
-}));
-
-export const postsRelations = relations(postsTable, ({ one }) => ({
-  creator: one(usersTable, {
-    fields: [postsTable.creatorId],
-    references: [usersTable.id],
-  }),
-}));
+export const likedTable = sqliteTable("liked", {
+  userId: integer("user_id")
+    .notNull()
+    .references(() => usersTable.id, { onDelete: "cascade" }),
+  postId: integer("post_id")
+    .notNull()
+    .references(() => postsTable.id, { onDelete: "cascade" }),
+});

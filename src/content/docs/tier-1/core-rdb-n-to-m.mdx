@@ -1,0 +1,214 @@
+---
+title: RDB で N to M のリレーションを記述する
+---
+import { Tabs, TabItem } from "@astrojs/starlight/components";
+
+[一つ前の章](/tier-1/core-rdb) で扱ったアプリケーションに、「いいね」機能を実装してみましょう。
+
+仕様はこんな感じです。
+
+- ユーザーは、ポストに「いいね」をつけれる。
+- ユーザーは、1 人あたり複数のポストにいいねをつけれる。
+- ポストは、 1 個あたり複数のユーザーがいいねをつけれる。
+
+## スキーマを定義する
+
+SQL のデータベースに直接多対多 (n to m) のリレーションを記述することはできないため、ひと工夫しましょう。
+
+`liked` (`Liked`) という「中間テーブル」を作成します。
+
+<Tabs syncKey="orm">
+  <TabItem label="Prisma">
+    ```prisma {5,13,16..23}
+    model User {
+      id    Int    @id @default(autoincrement())
+      name  String
+      createdPosts Post[]
+      liked Liked[]
+    }
+
+    model Post {
+      id        Int    @id @default(autoincrement())
+      creatorId Int
+      creator   User   @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+      content   String
+      likedBy   Liked[]
+    }
+
+    model Liked {
+      likedById Int
+      likedBy   User @relation(fields: [likedById], references: [id], onDelete: Cascade)
+      postId    Int
+      post      Post @relation(fields: [likedById], references: [id], onDelete: Cascade)
+
+      @@unique([likedById, postId])
+    }
+    ```
+  </TabItem>
+  <TabItem label="Drizzle">
+    <Tabs syncKey="drizzle-kind">
+      <TabItem label="Query API">
+        ```ts {14..21} {36..45}
+        export const usersTable = sqliteTable("users", {
+          id: integer().primaryKey({ autoIncrement: true }),
+          name: text().notNull(),
+        });
+
+        export const postsTable = sqliteTable("posts", {
+          id: integer().primaryKey({ autoIncrement: true }),
+          creatorId: integer("creator_id")
+            .notNull()
+            .references(() => usersTable.id, { onDelete: "cascade" }),
+          content: text().notNull(),
+        });
+
+        export const likedTable = sqliteTable("liked", {
+          userId: integer("user_id")
+            .notNull()
+            .references(() => usersTable.id, { onDelete: "cascade" }),
+          postId: integer("post_id")
+            .notNull()
+            .references(() => postsTable.id, { onDelete: "cascade" }),
+        });
+
+        export const usersRelations = relations(usersTable, ({ many }) => ({
+          posts: many(postsTable),
+          liked: many(likedTable),
+        }));
+
+        export const postsRelations = relations(postsTable, ({ one, many }) => ({
+          creator: one(usersTable, {
+            fields: [postsTable.creatorId],
+            references: [usersTable.id],
+          }),
+          likedBy: many(likedTable),
+        }));
+
+        export const likedRelations = relations(likedTable, ({ one }) => ({
+          user: one(usersTable, {
+            fields: [likedTable.userId],
+            references: [usersTable.id],
+          }),
+          post: one(postsTable, {
+            fields: [likedTable.postId],
+            references: [postsTable.id],
+          }),
+        }));
+        ```
+      </TabItem>
+      <TabItem label="SQL-like">
+        ```ts {14..21}
+        export const usersTable = sqliteTable("users", {
+          id: integer().primaryKey({ autoIncrement: true }),
+          name: text().notNull(),
+        });
+
+        export const postsTable = sqliteTable("posts", {
+          id: integer().primaryKey({ autoIncrement: true }),
+          creatorId: integer("creator_id")
+            .notNull()
+            .references(() => usersTable.id, { onDelete: "cascade" }),
+          content: text().notNull(),
+        });
+
+        export const likedTable = sqliteTable("liked", {
+          userId: integer("user_id")
+            .notNull()
+            .references(() => usersTable.id, { onDelete: "cascade" }),
+          postId: integer("post_id")
+            .notNull()
+            .references(() => postsTable.id, { onDelete: "cascade" }),
+        });
+        ```
+      </TabItem>
+    </Tabs>
+  </TabItem>
+  <TabItem label="SQL">
+    ```sql {12..16}
+    CREATE TABLE users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL
+    );
+
+    CREATE TABLE posts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      creator_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      content TEXT NOT NULL
+    );
+
+    CREATE TABLE liked (
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      post_id INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+      PRIMARY KEY (user_id, post_id)
+    );
+    ```
+  </TabItem>
+</Tabs>
+
+## 取得する
+
+では、ユーザーの `id` から、「ユーザーがいいねをつけたポスト」を取得してみましょう。
+
+<Tabs syncKey="orm">
+  <TabItem label="Prisma">
+    ```ts {3..9}
+    const user = await prisma.user.findUnique({
+      where: { id: 1 },
+      include: {
+        liked: {
+          select: {
+            post: true,
+          }
+        },
+      },
+    });
+    ```
+  </TabItem>
+  <TabItem label="Drizzle">
+    <Tabs syncKey="drizzle-kind">
+      <TabItem label="Query API">
+        ```ts {3..10}
+        const user = await db.query.usersTable.findFirst({
+          where: eq(usersTable.id, 1),
+          with: {
+            liked: {
+              columns: {}, // liked テーブル自体の情報はいらない
+              with: {
+                post: true,
+              },
+            },
+          },
+        });
+        ```
+      </TabItem>
+      <TabItem label="SQL-like">
+        ```ts {4..16}
+        await db
+          .select()
+          .from(postsTable)
+          .where(
+            exists(
+              db
+                .select()
+                .from(likedTable)
+                .where(
+                  and(
+                    eq(likedTable.userId, 1),
+                    eq(likedTable.postId, postsTable.id),
+                  ),
+                ),
+            ),
+          );
+        ```
+      </TabItem>
+    </Tabs>
+  </TabItem>
+  <TabItem label="SQL">
+    ```sql {2}
+    SELECT * FROM posts WHERE EXISTS (
+      SELECT * FROM liked WHERE liked.user_id = 1 AND liked.post_id = posts.id
+    );
+    ```
+  </TabItem>
+</Tabs>
+
