@@ -16,8 +16,8 @@ title: REST API
 
 とあるが、わかりにくいので具体的にどうなるかというと、
 
-- メソッドがリソースに対する操作を表す (動詞)
 - URLがリソースを表す (名詞)
+- メソッドがリソースに対する操作を表す (動詞)
 - URL は階層構造になる (例: `/users/:user-id`)
 - クエリパラメータは検索やフィルタといった条件になる (例: "?name=username", "?limit=10")
 
@@ -35,16 +35,43 @@ ut.code(); Learn では GET メソッドと POST メソッドを扱ったが、 
 それぞれに、
 
 - GET: リソースの取得
-- POST: リソースの作成
-- PUT, PATCH: リソースの更新
+- POST: リソースの作成 (冪等でない)
+- PUT: リソースの更新または作成 (冪等)
+- PATCH: リソースの更新
 - DELETE: リソースの削除
 
 という意味をもたせる。 PUT と PATCH には、
 
-- PUT: リソース全体を更新
-- PATCH: リソースを部分的に送信して更新
+- PUT: リソースの完全な表現を送信して更新
+- PATCH: リソースへの部分的な変更
 
-という違いがある。
+という違いをもたせる。
+(もちろん、必ずしもすべてのメソッドを実装する必要はない)
+
+また、
+
+- 安全: サーバーの状態を変更しない
+- べき等: サーバーが同じ状況にあるとき、特定のリクエストに対して何回でも続けて同じ効果が起こること
+
+と定義すると、それぞれ
+
+| メソッド | 安全性 | 冪等性 | 
+| -------- | ------ | ------ |
+| GET      | 必須   | 必須   |
+| POST     |        |        |
+| PUT      |        | 必須   |
+| PATCH    |        |        |
+| DELETE   |        | 必須   |
+
+安全なメソッドはすべて冪等であるが、冪等なメソッドが必ずしも安全とは限らない。
+
+参考:
+
+[Patch - HTTP | MDN](https://developer.mozilla.org/ja/docs/Web/HTTP/Reference/Methods/PATCH)
+
+[安全 (HTTP メソッド) | MDN](https://developer.mozilla.org/ja/docs/Glossary/Safe/HTTP)
+
+[べき等 | MDN](https://developer.mozilla.org/ja/docs/Glossary/Idempotent)
 
 ## 具体例
 
