@@ -91,7 +91,7 @@ resolve(4);
 ```
 
 ```bash
-$ bun run ./script5.ts
+$ bun run ./script4.ts
 1
 2
 3
@@ -100,6 +100,7 @@ $ bun run ./script5.ts
 </details>
 
 :::tip[プロミスチェーン]
+
 `then` や `catch` メソッドはそれぞれ新しいプロミスオブジェクトを返すので、複数繋げて非同期な処理の流れを記述することができます。
 
 ```ts title="script5.ts"
@@ -122,6 +123,7 @@ $ bun run ./script4.ts
 got status 200
 got error SyntaxError: Failed to parse JSON
 ```
+
 :::
 
 ## `async` と `await`
@@ -130,7 +132,7 @@ got error SyntaxError: Failed to parse JSON
 
 `async` キーワードを関数の宣言時につけることで、関数の内部で `await` というキーワードが使えるようになります。
 
-`await` キーワードは、 Promise オブジェクトのような `then` メソッドをもつものを、同期関数と同じような書き方で書けるようにする糖衣構文 (Syntax Sugar) です。
+`await` キーワードは、 Promise オブジェクトのような `then` メソッドをもつオブジェクトの非同期な扱いを、同期関数と同じような書き方で書けるようにする糖衣構文 (Syntax Sugar) です。
 
 ```ts title="script6.ts" "async" "await"
 async function main() {
@@ -139,11 +141,22 @@ async function main() {
     console.log("got status", res.status);
     const json = await res.json();
     console.log("got json", json);
+    return "ok";
   } catch (err) {
     console.log("got error", err);
+    return "error";
   }
 }
 main();
+```
+
+`async` をつけた関数はそれ自体が Promise を返します。
+
+```ts title="script6.ts"
+console.log(main());
+// -> Promise { <pending> }
+console.log(await main());
+// -> "error"
 ```
 
 `await` 自体にエラーハンドリングの仕組みは付属しないので、`catch` メソッドに代わるものとして `try ~ catch` を使います。
@@ -174,3 +187,40 @@ ESM の例
 
 </details>
 :::
+
+## 演習
+
+`https://jsonplaceholder.typicode.com/todos` にアクセスすると、適当な Todo を返してくれます。
+
+Fetch API を使って、ここで返される Todo を `title` で部分一致検索するような非同期関数を作ってみましょう。
+
+:::caution
+
+本来はデータ取得時 (データベースなど) にフィルタするべきですが、今回は JSON Placeholder がデータソースと考えましょう。
+
+:::
+
+<details>
+  <summary>
+    解答例
+  </summary>
+
+  ```ts
+  async function getTodos(titleLike: string): Promise<Todo[]> {
+    const resp = await fetch("https://jsonplaceholder.typicode.com/todos");
+    const todos: Todo[] = await resp.json();
+    return todos.filter((todo) => todo.title.includes(titleLike));
+  }
+
+  console.log(await getTodos("fugiat"));
+  // [
+  //   {
+  //     userId: 1,
+  //     id: 3,
+  //     title: "fugiat veniam minus",
+  //     completed: false,
+  //   }, ...
+  // ]
+
+  ```
+</details>
