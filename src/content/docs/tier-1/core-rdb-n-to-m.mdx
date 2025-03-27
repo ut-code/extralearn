@@ -11,18 +11,20 @@ import { Tabs, TabItem } from "@astrojs/starlight/components";
 - ユーザーは、1 人あたり複数のポストにいいねをつけれる。
 - ポストは、 1 個あたり複数のユーザーがいいねをつけれる。
 
-SQL のデータベースに直接 n to m のリレーションを記述することはできないため、ひと工夫しましょう。
+## スキーマを定義する
+
+SQL のデータベースに直接多対多 (n to m) のリレーションを記述することはできないため、ひと工夫しましょう。
 
 `liked` (`Liked`) という「中間テーブル」を作成します。
 
 <Tabs syncKey="orm">
   <TabItem label="Prisma">
-    ```prisma {15..22}
+    ```prisma {5,13,15..22}
     model User {
       id    Int    @id @default(autoincrement())
       name  String
       createdPosts Post[]
-      likedPosts Post[]
+      liked Liked[]
     }
 
     model Post {
@@ -30,6 +32,7 @@ SQL のデータベースに直接 n to m のリレーションを記述する�
       creatorId Int
       creator   User   @relation(fields: [creatorId], references: [id], onDelete: Cascade)
       content   String
+      likedBy   Liked[]
     }
 
     model Liked {
@@ -45,7 +48,7 @@ SQL のデータベースに直接 n to m のリレーションを記述する�
   <TabItem label="Drizzle">
     <Tabs syncKey="drizzle-kind">
       <TabItem label="Query API">
-        ```ts {14..21}
+        ```ts {14..21} {36..45}
         export const usersTable = sqliteTable("users", {
           id: integer().primaryKey({ autoIncrement: true }),
           name: text().notNull(),
@@ -94,18 +97,34 @@ SQL のデータベースに直接 n to m のリレーションを記述する�
         ```
       </TabItem>
       <TabItem label="SQL-like">
-        ```ts {5}
-        const res = await db
-          .select()
-          .from(usersTable)
-          .where(eq(usersTable.id, id))
-          .leftJoin(postsTable, eq(postsTable.creatorId, usersTable.id));
+        ```ts {14..21}
+        export const usersTable = sqliteTable("users", {
+          id: integer().primaryKey({ autoIncrement: true }),
+          name: text().notNull(),
+        });
+
+        export const postsTable = sqliteTable("posts", {
+          id: integer().primaryKey({ autoIncrement: true }),
+          creatorId: integer("creator_id")
+            .notNull()
+            .references(() => usersTable.id, { onDelete: "cascade" }),
+          content: text().notNull(),
+        });
+
+        export const likedTable = sqliteTable("liked", {
+          userId: integer("user_id")
+            .notNull()
+            .references(() => usersTable.id, { onDelete: "cascade" }),
+          postId: integer("post_id")
+            .notNull()
+            .references(() => postsTable.id, { onDelete: "cascade" }),
+        });
         ```
       </TabItem>
     </Tabs>
   </TabItem>
   <TabItem label="SQL">
-    ```sql "ON DELETE CASCADE"
+    ```sql {12..16}
     CREATE TABLE users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL
@@ -116,17 +135,31 @@ SQL のデータベースに直接 n to m のリレーションを記述する�
       creator_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
       content TEXT NOT NULL
     );
+
+    CREATE TABLE liked (
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      post_id INTEGER NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+      PRIMARY KEY (user_id, post_id)
+    );
     ```
   </TabItem>
 </Tabs>
 
+## 取得する
+
+では、ユーザーの `id` から、「ユーザーがいいねをつけたポスト」を取得してみましょう。
+
 <Tabs syncKey="orm">
   <TabItem label="Prisma">
-    ```ts {3..5}
+    ```ts {3..9}
     const user = await prisma.user.findUnique({
       where: { id: 1 },
       include: {
-        posts: true,
+        liked: {
+          select: {
+            post: true,
+          }
+        },
       },
     });
     ```
@@ -134,42 +167,47 @@ SQL のデータベースに直接 n to m のリレーションを記述する�
   <TabItem label="Drizzle">
     <Tabs syncKey="drizzle-kind">
       <TabItem label="Query API">
-        ```ts {3..8}
-        // schema.ts
-        // schema.ts に以下の文を追加します
-        export const usersRelations = relations(usersTable, ({ many }) => ({
-          posts: many(postsTable),
-        }));
-        export const postsRelations = relations(postsTable, ({ one }) => ({
-          creator: one(usersTable),
-        }));
-        ```
-        ```ts {6..8}
-        import * as schema from "./schema.ts";
-        const db = drizzle({ schema });
-
-        db.query.usersTable.selectFirst({
+        ```ts {3..10}
+        const user = await db.query.usersTable.findFirst({
           where: eq(usersTable.id, 1),
           with: {
-            posts: true,
-          }
-        })
+            liked: {
+              columns: {}, // liked テーブル自体の情報はいらない
+              with: {
+                post: true,
+              },
+            },
+          },
+        });
         ```
       </TabItem>
       <TabItem label="SQL-like">
-        ```ts {5}
-        const res = await db
+        ```ts {4..16}
+        await db
           .select()
-          .from(usersTable)
-          .where(eq(usersTable.id, id))
-          .leftJoin(postsTable, eq(postsTable.creatorId, usersTable.id));
+          .from(postsTable)
+          .where(
+            exists(
+              db
+                .select()
+                .from(likedTable)
+                .where(
+                  and(
+                    eq(likedTable.userId, 1),
+                    eq(likedTable.postId, postsTable.id),
+                  ),
+                ),
+            ),
+          );
         ```
       </TabItem>
     </Tabs>
   </TabItem>
   <TabItem label="SQL">
-    ```sql /LEFT JOIN [^;]+/
-    SELECT * FROM users WHERE users.id = 1 LEFT JOIN posts ON users.id = posts.creator_id;
+    ```sql {2}
+    SELECT * FROM posts WHERE EXISTS (
+      SELECT * FROM liked WHERE liked.user_id = 1 AND liked.post_id = posts.id
+    );
     ```
   </TabItem>
 </Tabs>

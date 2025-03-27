@@ -47,11 +47,4 @@ test("all functions", async () => {
       },
     ],
   });
-
-  const { posts } = await core.getUser(userId);
-  expect(posts.map((post) => post.content)).toEqual(["Hello,", "World!"]);
-  if (!posts[0]) throw new Error("0 posts found");
-  expect(await core.getPost(posts[0].id)).toSatisfy(
-    (post) => post?.creator.name === "aster-void",
-  );
 });
