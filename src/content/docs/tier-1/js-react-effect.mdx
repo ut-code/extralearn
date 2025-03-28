@@ -1,0 +1,58 @@
+---
+title: useEffectについて
+---
+
+## 副作用(Side Effects)とは？
+React のコンポーネントは、基本的に「入力(props, state)→ 出力(UI)」という流れで動作します。
+しかし、コンポーネントのレンダリングとは直接関係のない処理(例: データの取得、購読の登録、DOM の操作など)が必要な場合があります。
+これらの処理は「副作用(Side Effects)」と呼ばれます。そういった副作用を適切に管理するために、React では useEffect フックが用意されています。
+
+## useEffectの使い方
+実際にコードを書いて、useEffect の使い方を学んでいきましょう。
+ここでは、ut.code(); Learn のプロジェクトである[ストップウォッチ](https://learn.utcode.net/docs/trial-session/project/)を React で実装することを考えます。
+
+### Step 0: 環境構築
+vite を使って、環境構築していきます。
+ここでは、パッケージマネージャーとして bun を用いますが、npm でも問題ありません。
+```sh
+bun create vite@latest
+```
+プロジェクトの名前を foo にしたと仮定して、話を進めます。
+```sh
+cd foo
+bun dev
+```
+これで http://localhost:5173 を開いて vite のデフォルトのページが表示されれば、環境構築は完了です。
+
+### Step 1: 副作用の宣言
+まずは、ページを開いたと同時に時間が経過していく、簡単なストップウォッチを作ってみましょう。src/App.tsx を編集していきます。
+useEffect の第一引数には、副作用として実行したい関数を与えます。
+何秒たったかページに表示させるために、time という状態がすでに定義されているとしたら、副作用として、「1000ミリ秒ごとに time を 1 だけ増やす」というのが今回やりたいことになります。
+setInterval 関数を使えば、n ミリ秒ごとにコールバック関数を実行できるというのは、ut.code(); Learn で履修済みですね？
+```js
+// App.tsx
+import { useEffect, useState } from "react";
+
+export default function App() {
+  const [time, setTime] = useState(0);
+  useEffect(() => {
+    setInterval(() => setTime(time + 1), 1000)
+  })
+  return <div>time: {time}</div>
+}
+```
+useEffect や setInterval のコールバック関数が無名関数で定義されているのは大丈夫ですか？
+関数は () がついたタイミングで評価されるので、例えば `setTime(time + 1)` を setInterval 関数の引数として直接渡すことはできないのです！
+
+### Step 2: 副作用は 2 回実行される！？
+ただ、このままだといくつか問題があります。その問題が何か知るために、簡単な実験を行いましょう。
+まず、先ほどの App.tsx でコンソールに time の値を表示するようにしましょう。
+time という状態が更新されたときに、コンポーネントはレンダリングされるので、1 秒ごとに time の値が表示されるはずです。
+どうなりましたか？
+
+### Step 3: 副作用が消えない！！
+その中の一つがクリーンアップ関数が定義されていないということです。
+クリーンアップ関数とは、コンポーネントが DOM から削除された（アンマウントされた）ときに、副作用の効果をなくす関数のことです。
+というのも、setInterval 関数
+### Step 4: スタートボタンの実装
+### Step 5: ストップボタンの実装
