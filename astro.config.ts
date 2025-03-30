@@ -8,7 +8,7 @@ export default defineConfig({
   site: "https://extra.utcode.net",
   integrations: [
     starlight({
-      title: "My Docs",
+      title: "Extra Learn",
       plugins: [starlightThemeRapidePlugin()],
       social: {
         github: "https://github.com/ut-code/extralearn",
