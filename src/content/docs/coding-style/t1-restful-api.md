@@ -73,6 +73,36 @@ ut.code(); Learn では GET メソッドと POST メソッドを扱ったが、 
 
 [べき等 | MDN](https://developer.mozilla.org/ja/docs/Glossary/Idempotent)
 
+## ステータスコード
+
+REST API では、ステータスコードによってレスポンスの種類を分類している。
+
+例えば、
+
+- 200 番台は成功
+- 300 番台はリダイレクトやキャッシュ
+- 400 番台はクライアントの失敗
+- 500 番台はサーバーの失敗
+
+のようにグルーピングされており、それぞれの番号に意味がある。
+
+例えば、
+
+- 200 OK: 成功
+- 201 Created: リソースを作成しました
+- 202 Accepted: リクエストは受理されたが、まだ実行されていない
+
+- 400 Bad Request: クライアントのエラーとみなされるもの
+- 401 Unauthorized: 認証を受ける必要があります
+- 403 Forbidden: 認証はありますが、認可がありません
+- 404 Not Found: リソースが存在しません
+
+など。
+
+参考:
+
+[HTTP レスポンスステータス | MDN](https://developer.mozilla.org/ja/docs/Web/HTTP/Reference/Status)
+
 ## 具体例
 
 ある RESTful なサービスにユーザーを作成してから削除するまでの流れを具体例とする。
