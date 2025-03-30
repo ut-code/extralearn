@@ -15,8 +15,20 @@ export default defineConfig({
       },
       sidebar: [
         {
-          label: "最重要",
-          autogenerate: { directory: "tier-1" },
+          label: "中心概念",
+          autogenerate: { directory: "core" },
+        },
+        {
+          label: "JS/TS の追加学習",
+          autogenerate: { directory: "js-ts" },
+        },
+        {
+          label: "周辺ツール",
+          autogenerate: { directory: "toolchain" },
+        },
+        {
+          label: "コーディングスタイル",
+          autogenerate: { directory: "coding-style" },
         },
       ],
     }),
