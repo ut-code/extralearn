@@ -26,9 +26,10 @@ bun dev
 
 ### Step 1: 副作用の宣言
 まずは、ページを開いたと同時に時間が経過していく、簡単なストップウォッチを作ってみましょう。src/App.tsx を編集していきます。
-useEffect の第一引数には、副作用として実行したい関数を与えます。
-何秒たったかページに表示させるために、time という状態がすでに定義されているとしたら、副作用として、「1000ミリ秒ごとに time を 1 だけ増やす」というのが今回やりたいことになります。
-setInterval 関数を使えば、n ミリ秒ごとにコールバック関数を実行できるというのは、ut.code(); Learn で履修済みですね？
+useEffect の第一引数には、副作用として実行したい関数を与えます。この場合、その関数はコンポーネントがレンダリングされた**後に**実行されます。
+何秒たったかページに表示させるために、time という状態を定義します。
+副作用として、「1000ミリ秒ごとに time を 1 だけ増やす」というのが今回やりたいことになります。
+setInterval 関数を使えば、n ミリ秒ごとにコールバック関数を実行できるというのは、ut.code(); Learn でも出てきましたね。
 ```js
 // App.tsx
 import { useEffect, useState } from "react";
@@ -41,18 +42,60 @@ export default function App() {
   return <div>time: {time}</div>
 }
 ```
-useEffect や setInterval のコールバック関数が無名関数で定義されているのは大丈夫ですか？
+useEffect や setInterval のコールバック関数が無名関数で定義されているのはどうしてでしょうか？
 関数は () がついたタイミングで評価されるので、例えば `setTime(time + 1)` を setInterval 関数の引数として直接渡すことはできないのです！
 
-### Step 2: 副作用は 2 回実行される！？
-ただ、このままだといくつか問題があります。その問題が何か知るために、簡単な実験を行いましょう。
-まず、先ほどの App.tsx でコンソールに time の値を表示するようにしましょう。
-time という状態が更新されたときに、コンポーネントはレンダリングされるので、1 秒ごとに time の値が表示されるはずです。
-どうなりましたか？
+### Step 2: ストップウォッチが加速する！？
+Step 1 で作ったストップウォッチには一つ致命的な問題があります。それは、少し時間を経過させると分かります。
+そう、加速するのです！！
+これはどうしてでしょうか？先ほどコンポーネントがレンダリングされた後に副作用が実行されると説明しましたが、ではコンポーネントがレンダリングされるのはいつでしょうか？
+[ut.code(); Learn](https://learn.utcode.net/docs/advanced/react/) で説明されているように、状態が更新される度にレンダリングされるのです！
+つまり、time が更新される度にタイマーが作られるのですね！それがストップウォッチが加速する理由になります。
+ではどうやってこの問題を解決すればよいでしょうか？
+コンポーネントがDOMから削除された（アンマウントされた）ときに、タイマーも削除すればいいですね！
+useEffect では、コールバック関数の返り値として関数（クリーンアップ関数といいます）を指定することで、コンポーネントがアンマウントされたときにクリーンアップ関数が実行されます。
+clearInterval を使ってタイマーを削除すればいいですね！
+```js
+import { useEffect, useState } from "react";
 
-### Step 3: 副作用が消えない！！
-その中の一つがクリーンアップ関数が定義されていないということです。
-クリーンアップ関数とは、コンポーネントが DOM から削除された（アンマウントされた）ときに、副作用の効果をなくす関数のことです。
-というのも、setInterval 関数
-### Step 4: スタートボタンの実装
-### Step 5: ストップボタンの実装
+export default function App() {
+	const [time, setTime] = useState(0);
+	useEffect(() => {
+		const timerID = setInterval(() => setTime(time + 1), 1000);
+		return () => clearInterval(timerID);
+	});
+	return <div>time: {time}</div>;
+}
+```
+まあ setInterval の代わりに setTimeOut を使えば、この場合はクリーンアップ関数は要らないんですけど、クリーンアップ関数の説明がしたかったので、setInterval を使いました。
+
+### Step 3: スタートボタンの実装
+次に、スタートボタンを実装してみましょう。このままだと、ページが読み込まれたときにどうしてもタイマーが作動してしまいます。
+そこで、running という状態を定義して、running が true のときだけ、タイマーが作動するようにしましょう。
+```js
+import { useEffect, useState } from "react";
+
+export default function App() {
+	const [time, setTime] = useState(0);
+	const [running, setRunning] = useState(false);
+	useEffect(() => {
+		if (running) {
+			const timerID = setInterval(() => setTime(time + 1), 1000);
+			return () => clearInterval(timerID);
+		}
+	});
+	return (
+		<>
+			<button onClick={() => setRunning(true)}>Start</button>
+			<div>time: {time}</div>
+		</>
+	);
+}
+```
+
+### Step 4: ストップボタンの実装
+ストップボタンの実装について考えてみましょう。
+
+
+
+## 別の副作用の例
