@@ -102,6 +102,10 @@ export default function App() {
 }
 ```
 
+:::tip
+空の配列を渡せば、初回レンダリング時のみ発火させることができます。
+:::
+
 ### Step 4: スタートボタンの実装
 次に、スタートボタンを実装してみましょう。このままだと、ページが読み込まれたときに常にタイマーが作動してしまいます。
 そこで、running という状態を定義して、running が true のときだけ、タイマーが作動するようにしましょう。useEffect の依存配列に running を追加するのを忘れると、スタートボタンを押して、running が true になっても useEffect が発火しません。
@@ -165,4 +169,57 @@ useEffect の中で useState を呼ぶと「状態が更新される→レンダ
 :::
 
 ## 別の副作用の例
-今度は、外部データを取得する方法について考えてみましょう。
+今度は、外部データを取得する方法について考えてみましょう。[async / await とプロミスオブジェクト](https://extra.utcode.net/js-ts/t1-promise/#%E6%BC%94%E7%BF%92)の演習でやったように JSONPlaceholder を使用します。
+```js
+import { useEffect, useState } from "react";
+
+export default function App() {
+	const [title, setTitle] = useState("");
+	useEffect(() => {
+		const fetchData = async () => {
+			fetch("https://jsonplaceholder.typicode.com/todos/1")
+				.then((response) => response.json())
+				.then((json) => setTitle(json.title));
+      console.log("json requested.");
+		};
+		fetchData();
+	}, []);
+	return <div>title: {title}</div>;
+}
+
+```
+
+:::caution
+useEffect フックは、同期的に実行される副作用を処理するために設計されています。非同期関数を直接 useEffect のコールバック内で使うと、useEffect の本来の挙動（同期的に処理を完了させること）を破ってしまう可能性があるため、async 関数を直接渡すことはできません。
+:::
+
+開発者ツールでコンソールを見てみましょう。開発者ツールについては、[ut.code(); Learn](https://learn.utcode.net/docs/browser-apps/inspector/)で説明があり、タブを切り替えることでコンソールを見ることができます。
+同じ JSON が二回コンソールに出力されているのが分かりましたでしょうか？useEffect は二回実行されているのです！
+副作用は何回実行しても結果が変わらないという性質（べき等）であるべき思想があり、React は useEffect を動作確認のために二回実行しています。
+
+### AbortController
+では、二回目のリクエストをキャンセルする方法について学びましょう。
+[公式チュートリアル](https://react.dev/learn/synchronizing-with-effects#fetching-data)では、二回目に fetch したデータを無視する簡単なロジックを実装していますが、ここでは [AbortController](https://developer.mozilla.org/en-US/docs/Web/API/AbortController) を使う方法を以下に示します。
+
+```js {6, 14}
+import { useEffect, useState } from "react";
+
+export default function App() {
+	const [title, setTitle] = useState("");
+	useEffect(() => {
+		const controller = new AbortController();
+		const fetchData = async () => {
+			fetch("https://jsonplaceholder.typicode.com/todos/1")
+				.then((response) => response.json())
+				.then((json) => setTitle(json.title));
+			console.log("json requested");
+		};
+		fetchData();
+		return () => controller.abort();
+	}, []);
+	return <div>title: {title}</div>;
+}
+
+```
+
+このようにすることで、開発環境では二回リクエストが送られますが、本番環境では一度だけ送られるようになります。めでたしめでたし。
