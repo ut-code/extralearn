@@ -1,5 +1,5 @@
 ---
-title: Reactのフックについて
+title: Reactのその他のフックについて
 ---
 
 ## Reactのフックについて
@@ -7,3 +7,76 @@ title: Reactのフックについて
 これまで、useState や useEffect について学んできましたが、それ以外にもフックがあり、詳細は[公式ドキュメント](https://react.dev/reference/react/hooks)を参照してほしいのですが、ここではその中でもよく使うものを実用例とともに紹介していきます。
 
 ## useContext
+コンポーネント間で状態を共有するために props を引数として渡すというのは ut.code(); Learn で学びましたが、その方法だと UI ツリーの深い階層にあるコンポーネントと状態を共有するときに、props をバケツリレーのように渡す必要があります。
+そんなときに直接共有できるようにするために使うのが useContext フックになります。このフックは[公式チュートリアル](https://react.dev/learn/passing-data-deeply-with-context)でも説明があり、詳しくはそちらを参照してください。
+公式チュートリアルでは、useReducer と useContext を組み合わせて使う方法についての説明がありますが、ここでは useContext と useState を組み合わせてカラーテーマを変更できるようにしたいと思います。
+
+### Step 0: 環境構築
+[ReactのuseEffectについて](https://extra.utcode.net/js-ts/t1-react-effect/#step-0-%E7%92%B0%E5%A2%83%E6%A7%8B%E7%AF%89) という章を参照してください。
+
+### Step 1: Contextを作成
+createContext を使えば、コンポーネント間で共有される Context を作成することができます。型の定義もやってしまいます。
+```js 
+// src/ThemeContext.ts
+import { createContext } from "react";
+
+export type ThemeType = "light" | "dark";
+type ThemeContextType = {
+	theme: ThemeType;
+	toggleTheme: () => void;
+};
+
+export const ThemeContext = createContext<ThemeContextType>({
+	theme: "light",
+	toggleTheme: () => {},
+});
+```
+
+### Step 2: Contextを使用
+Message コンポーネントを作成し、そこで ThemeContext を使用しましょう。
+```js
+// src/components/Message.tsx
+import { useContext } from "react";
+import { ThemeContext } from "../ThemeContext";
+
+export default function Message() {
+	const { theme, toggleTheme } = useContext(ThemeContext);
+	const fontColor = theme === "dark" ? "#fff" : "#000";
+	const backgroundColor = theme === "dark" ? "#000" : "#fff";
+
+	return (
+		<div
+			style={{
+				color: fontColor,
+				background: backgroundColor,
+			}}
+		>
+			theme: {theme}
+			<button onClick={toggleTheme}>toggle theme</button>
+		</div>
+	);
+}
+
+```
+
+### Step 3: Providerを定義
+親コンポーネントで、Provider を定義しましょう。
+```js
+// src/App.tsx
+import { useState } from "react";
+import { ThemeType, ThemeContext } from "./ThemeContext";
+import Message from "./components/Message";
+
+export default function App() {
+	const [theme, setTheme] = useState<ThemeType>("light");
+	const toggleTheme = () => {
+		setTheme(theme == "dark" ? "light" : "dark");
+	};
+	return (
+		<ThemeContext.Provider value={{ theme, toggleTheme }}>
+			<Message />
+		</ThemeContext.Provider>
+	);
+}
+
+```
