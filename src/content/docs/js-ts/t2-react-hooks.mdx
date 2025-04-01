@@ -80,3 +80,46 @@ export default function App() {
 }
 
 ```
+
+ここまでコードを書いたら、サーバーを起動してください。
+toggle theme というボタンを押して、テーマが変わるはずです。
+
+## useRef
+[ReactのuseEffectについて](https://extra.utcode.net/js-ts/t1-react-effect/) で軽く触れましたが、値が変更されてもレンダリングしてほしくないときに useRef フックを使います。
+useRef についても、[公式チュートリアル](https://react.dev/learn/referencing-values-with-refs) で説明があるので、詳しくはそちらを参照してください。
+公式チュートリアルでは、DOM 操作で useRef を使う方法も紹介されていますが、ここではストップウォッチの例で useRef について説明します。
+
+### ストップウォッチの改善
+useEffect の中で useState を使うと無限ループする可能性があるので、useRef を使うことでより安全にしたいと思います。
+```js
+// App.tsx
+import { useEffect, useRef, useState } from "react";
+
+export default function App() {
+	const [time, setTime] = useState(0);
+	const [running, setRunning] = useState(false);
+	const timerIDRef = useRef(0);
+	useEffect(() => {
+		if (running) {
+			timerIDRef.current = setInterval(() => setTime(time + 1), 1000);
+			return () => clearInterval(timerIDRef.current);
+		}
+	}, [time, running]);
+	return (
+		<>
+			<button onClick={() => setRunning(true)}>Start</button>
+			<button
+				onClick={() => {
+					setRunning(false), clearInterval(timerIDRef.current);
+				}}
+			>
+				Stop
+			</button>
+			<div>time: {time}</div>
+		</>
+	);
+}
+
+```
+
+## キャッシュ
