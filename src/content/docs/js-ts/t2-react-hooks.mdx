@@ -123,9 +123,9 @@ export default function App() {
 ```
 
 ## キャッシュ
-データを一時的に保存して、次回のアクセスを高速にする仕組みのことを**キャッシュ(cache) **と言いますが、React にも [useCallback](https://react.dev/reference/react/useCallback)
+データを一時的に保存して、次回のアクセスを高速にする仕組みのことを ***キャッシュ(cache)*** と言いますが、React にも [useCallback](https://react.dev/reference/react/useCallback)
  や [useMemo](https://react.dev/reference/react/useMemo) のように関数や計算結果をキャッシュするためのフックがあります。
  また、Next.js などでサーバーコンポーネントでリクエストの結果をキャッシュしたいときには [React.cache](https://react.dev/reference/react/cache) を使うとよいです。
 
- ## カスタムフック
- フックは自分で定義することもできます。例を見ていきましょう。
+## カスタムフック
+既存のフックをラップすることで、自分で新しいフックを作成することもできます。詳細は [公式チュートリアル](https://react.dev/learn/reusing-logic-with-custom-hooks) を参照してください。
