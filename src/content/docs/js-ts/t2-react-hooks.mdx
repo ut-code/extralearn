@@ -16,7 +16,7 @@ title: Reactのその他のフックについて
 
 ### Step 1: Contextを作成
 createContext を使えば、コンポーネント間で共有される Context を作成することができます。型の定義もやってしまいます。
-```js 
+```ts
 // src/ThemeContext.ts
 import { createContext } from "react";
 
@@ -34,7 +34,7 @@ export const ThemeContext = createContext<ThemeContextType>({
 
 ### Step 2: Contextを使用
 Message コンポーネントを作成し、そこで ThemeContext を使用しましょう。
-```js
+```tsx
 // src/components/Message.tsx
 import { useContext } from "react";
 import { ThemeContext } from "../ThemeContext";
@@ -60,8 +60,8 @@ export default function Message() {
 ```
 
 ### Step 3: Providerを定義
-親コンポーネントで、Provider を定義しましょう。
-```js
+親コンポーネントで、Provider を定義しましょう。Provider でラップすることで、Context を子コンポーネントと共有することができます。
+```tsx
 // src/App.tsx
 import { useState } from "react";
 import { ThemeType, ThemeContext } from "./ThemeContext";
@@ -91,7 +91,7 @@ useRef についても、[公式チュートリアル](https://react.dev/learn/r
 
 ### ストップウォッチの改善
 useEffect の中で useState を使うと無限ループする可能性があるので、useRef を使うことでより安全にしたいと思います。
-```js
+```tsx
 // App.tsx
 import { useEffect, useRef, useState } from "react";
 
