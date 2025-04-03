@@ -127,6 +127,9 @@ export default function App() {
 データを一時的に保存して、次回のアクセスを高速にする仕組みのことを ***キャッシュ(cache)*** と言いますが、React にも [useCallback](https://react.dev/reference/react/useCallback)
  や [useMemo](https://react.dev/reference/react/useMemo) のように関数や計算結果をキャッシュするためのフックがあります。
  また、Next.js などでサーバーコンポーネントでリクエストの結果をキャッシュしたいときには [React.cache](https://react.dev/reference/react/cache) を使うとよいです。
+ :::tip
+useCallback が「関数そのものをキャッシュする」という説明は少し分かりづらいですが、関数の生成はレンダリングごとに行われ、前回と同じ依存関係なら前回と同じ関数の参照（メモリアドレス）を返す、ということです。
+ :::
 
 ## カスタムフック
 既存のフックをラップすることで、自分で新しいフックを作成することもできます。詳細は [公式チュートリアル](https://react.dev/learn/reusing-logic-with-custom-hooks) を参照してください。
