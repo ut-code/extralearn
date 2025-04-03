@@ -110,7 +110,8 @@ export default function App() {
 			<button onClick={() => setRunning(true)}>Start</button>
 			<button
 				onClick={() => {
-					setRunning(false), clearInterval(timerIDRef.current);
+					setRunning(false);
+					clearInterval(timerIDRef.current);
 				}}
 			>
 				Stop
