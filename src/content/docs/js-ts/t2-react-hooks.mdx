@@ -1,0 +1,135 @@
+---
+title: Reactのその他のフックについて
+---
+
+## Reactのフックについて
+[ut.code(); Learn](https://learn.utcode.net/docs/advanced/react/#usestate%E3%83%95%E3%83%83%E3%82%AF%E3%81%A8%E7%8A%B6%E6%85%8B) でも学んだように、React にはコンポーネント内からのみ呼び出せる特別な関数があり、それらを**フック**と呼ぶのでした。
+これまで、useState や useEffect について学んできましたが、それ以外にもフックがあり、詳細は[公式ドキュメント](https://react.dev/reference/react/hooks)を参照してほしいのですが、ここではその中でもよく使うものを実用例とともに紹介していきます。
+
+## useContext
+コンポーネント間で状態を共有するために props を引数として渡すというのは ut.code(); Learn で学びましたが、その方法だと UI ツリーの深い階層にあるコンポーネントと状態を共有するときに、props をバケツリレーのように渡す必要があります。
+そんなときに直接共有できるようにするために使うのが useContext フックになります。このフックは[公式チュートリアル](https://react.dev/learn/passing-data-deeply-with-context)でも説明があり、詳しくはそちらを参照してください。
+公式チュートリアルでは、useReducer と useContext を組み合わせて使う方法についての説明がありますが、ここでは useContext と useState を組み合わせてカラーテーマを変更できるようにしたいと思います。
+
+### Step 0: 環境構築
+[ReactのuseEffectについて](https://extra.utcode.net/js-ts/t1-react-effect/#step-0-%E7%92%B0%E5%A2%83%E6%A7%8B%E7%AF%89) という章を参照してください。
+
+### Step 1: Contextを作成
+createContext を使えば、コンポーネント間で共有される Context を作成することができます。型の定義もやってしまいます。
+```ts
+// src/ThemeContext.ts
+import { createContext } from "react";
+
+export type ThemeType = "light" | "dark";
+type ThemeContextType = {
+	theme: ThemeType;
+	toggleTheme: () => void;
+};
+
+export const ThemeContext = createContext<ThemeContextType>({
+	theme: "light",
+	toggleTheme: () => {},
+});
+```
+
+### Step 2: Contextを使用
+Message コンポーネントを作成し、そこで ThemeContext を使用しましょう。
+```tsx
+// src/components/Message.tsx
+import { useContext } from "react";
+import { ThemeContext } from "../ThemeContext";
+
+export default function Message() {
+	const { theme, toggleTheme } = useContext(ThemeContext);
+	const fontColor = theme === "dark" ? "#fff" : "#000";
+	const backgroundColor = theme === "dark" ? "#000" : "#fff";
+
+	return (
+		<div
+			style={{
+				color: fontColor,
+				background: backgroundColor,
+			}}
+		>
+			theme: {theme}
+			<button onClick={toggleTheme}>toggle theme</button>
+		</div>
+	);
+}
+
+```
+
+### Step 3: Providerを定義
+親コンポーネントで、Provider を定義しましょう。Provider でラップすることで、Context を子コンポーネントと共有することができます。
+```tsx
+// src/App.tsx
+import { useState } from "react";
+import { ThemeType, ThemeContext } from "./ThemeContext";
+import Message from "./components/Message";
+
+export default function App() {
+	const [theme, setTheme] = useState<ThemeType>("light");
+	const toggleTheme = () => {
+		setTheme(theme === "dark" ? "light" : "dark");
+	};
+	return (
+		<ThemeContext.Provider value={{ theme, toggleTheme }}>
+			<Message />
+		</ThemeContext.Provider>
+	);
+}
+
+```
+
+ここまでコードを書いたら、サーバーを起動してください。
+toggle theme というボタンを押して、テーマが変えることができるはずです。
+
+## useRef
+[ReactのuseEffectについて](https://extra.utcode.net/js-ts/t1-react-effect/) で軽く触れましたが、値が変更されても再レンダリングしてほしくないときに useRef フックを使います。
+useRef についても、[公式チュートリアル](https://react.dev/learn/referencing-values-with-refs) で説明があるので、詳しくはそちらを参照してください。
+公式チュートリアルでは、DOM 操作で useRef を使う方法も紹介されていますが、ここではストップウォッチの例で useRef について説明します。
+
+### ストップウォッチの改善
+useEffect の中で useState を使うと無限ループする可能性があるので、useRef を使うことでより安全にしたいと思います。
+```tsx
+// App.tsx
+import { useEffect, useRef, useState } from "react";
+
+export default function App() {
+	const [time, setTime] = useState(0);
+	const [running, setRunning] = useState(false);
+	const timerIDRef = useRef(0);
+	useEffect(() => {
+		if (running) {
+			timerIDRef.current = setInterval(() => setTime(time + 1), 1000);
+			return () => clearInterval(timerIDRef.current);
+		}
+	}, [time, running]);
+	return (
+		<>
+			<button onClick={() => setRunning(true)}>Start</button>
+			<button
+				onClick={() => {
+					setRunning(false);
+					clearInterval(timerIDRef.current);
+				}}
+			>
+				Stop
+			</button>
+			<div>time: {time}</div>
+		</>
+	);
+}
+
+```
+
+## キャッシュ
+データを一時的に保存して、次回のアクセスを高速にする仕組みのことを ***キャッシュ(cache)*** と言いますが、React にも [useCallback](https://react.dev/reference/react/useCallback)
+ や [useMemo](https://react.dev/reference/react/useMemo) のように関数や計算結果をキャッシュするためのフックがあります。
+ また、Next.js などでサーバーコンポーネントでリクエストの結果をキャッシュしたいときには [React.cache](https://react.dev/reference/react/cache) を使うとよいです。
+ :::tip
+useCallback が「関数そのものをキャッシュする」という説明は少し分かりづらいですが、関数の生成はレンダリングごとに行われ、前回と同じ依存関係なら前回と同じ関数の参照を使い回す、ということです。
+ :::
+
+## カスタムフック
+既存のフックをラップすることで、自分で新しいフックを作成することもできます。詳細は [公式チュートリアル](https://react.dev/learn/reusing-logic-with-custom-hooks) を参照してください。
