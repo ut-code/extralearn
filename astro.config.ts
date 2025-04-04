@@ -23,6 +23,10 @@ export default defineConfig({
           autogenerate: { directory: "js-ts" },
         },
         {
+          label: "Web API",
+          autogenerate: { directory: "web-api" },
+        },
+        {
           label: "周辺ツール",
           autogenerate: { directory: "toolchain" },
         },
