@@ -106,11 +106,19 @@ Hono や Express ではこういうのを自動でやってくれる `cors` ミ�
 
 ## Cookie のドメイン制限
 
+TODO: Cookie のドメイン属性はどこでいつ使われる？
+
 Cookie の `Domain` 属性は、 CORS のドメイン制限と挙動が異なります。
 
 具体的には、
 
-- `Domain` 属性を指定しない場合、全く同じドメインからのリクエストのみ許可
+- `Domain` 属性を指定しない場合、全く同じドメインからのリクエストのみ許可 (CORS と同じ)
 - `Domain` 属性にドメインを指定する場合、`Domain` で終わるドメインのサブドメインはすべて許可
+  - CORS の場合、サブドメインによる指定は不可
+- `Domain` 属性に指定できるドメインは、 eTLD + 1 までという制限がある。
+  - eTLD とは: effective Top Level Domain = 実質的なトップレベルドメイン
+    - `com`, `co.jp`, `pages.dev` のように、共有されていて複数の人がサブドメインを取得できるようなドメイン。
+  - つまり、 `api.utcode.net` の場合は `api.utcode.net` `utcode.net` は指定できるが、 `net` は不可能
+  - CORS にはない制限。
 
 詳細: [Cookie の送信先の定義 | MDN](https://developer.mozilla.org/ja/docs/Web/HTTP/Guides/Cookies#cookie_%E3%81%AE%E9%80%81%E4%BF%A1%E5%85%88%E3%81%AE%E5%AE%9A%E7%BE%A9)
