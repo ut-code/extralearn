@@ -1,0 +1,15 @@
+{
+  "name": "t2-cors",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "^1.2.8"
+  },
+  "peerDependencies": {
+    "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "hono": "^4.7.5"
+  }
+}
