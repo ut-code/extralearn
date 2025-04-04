@@ -1,78 +1,99 @@
 ---
-title: CORS
+title: CORS のドメイン指定と Cookie の Domain
 ---
 
 # CORS (Cross-Origin Resource Sharing) とは？
 
 CORS（クロスオリジンリソース共有）は、異なるオリジン（ドメイン、プロトコル、ポートが異なるリソース）間でのデータのやり取りを制御する仕組みです。
 
-通常、**ブラウザは**セキュリティ上の理由から、スクリプトが異なるオリジンのリソースを読み取ることを制限します（同一オリジンポリシー = SOP と呼ばれます）。
+通常、ブラウザはセキュリティ上の理由から、スクリプトが異なるオリジンのリソースを読み取ることを制限します（同一オリジンポリシー = SOP と呼ばれます）。
+
+:::tip
+
+重要なのは、
+
+- **ブラウザ**が
+- リソースの**読み取り**
+
+を制限しているということです。なので、リクエストは送信されますし、レスポンスもちゃんと返ってきていて、ネットワークタブを見れば確認できます。
+
+:::
 
 CORS はこの制限を緩和するために利用されます。
 
-## CORS の基本
-
-CORS では、サーバーが `Access-Control-Allow-Origin` ヘッダーを使用して、どのオリジンからのリクエストを許可するかをブラウザに指示します。
-
 ### SOP によってブロックされるリソースの例
 
-```typescript
-const data = await fetch('https://example.com/api/data')
-  .then(response => response.json());
+```ts
+const text = await fetch('http://localhost:3000/')
+  .then(response => response.text());
 ```
 
-このコードを `https://app.utcode.net` で実行すると、`https://example.com/api/data` へのリクエストが CORS ポリシーによりブロックさます。
+このコードを `http://localhost:8000/` で実行すると、`http://localhost:3000/` のリソースが CORS ポリシーによりブロックされます。
 
-## サーバー側の設定例
+:::caution
 
-サーバー側で CORS を許可するには、適切なヘッダーを設定する必要があります。
+試しに再現して見る場合は、 Chromium 系のブラウザでやるようにしてください。
 
-### Node.js（Express）での設定
+Firefox ベースのブラウザだと、 localhost での SOP 制限が効かないようです。
 
-```javascript
-const express = require('express');
-const cors = require('cors');
+:::
 
-const app = express();
-app.use(cors()); // すべてのオリジンを許可
+## CORS の基本
 
-app.get('/api/data', (req, res) => {
-  res.json({ message: 'CORS 許可済み' });
-});
+CORS では、サーバーが `Access-Control` で始まるヘッダーを使用して、どのオリジンからのリソースの読み込みを許可するかをブラウザに指示します。
 
-app.listen(3000, () => console.log('Server running on port 3000'));
-```
+サーバー側でリソースへの基本的なアクセスを許可するには、`Access-Control-Allow-Origin` を設定します。
 
-この設定では、どのオリジンからでもリクエストを受け付けるようになります。
-
-### 特定のオリジンのみ許可する
-
-```javascript
-app.use(cors({ origin: 'https://mywebsite.com' }));
-```
-
-これにより、`https://mywebsite.com` からのリクエストのみ許可されます。
-
-## プリフライトリクエストとは？
-
-特定の HTTP メソッド（例: `PUT`, `DELETE`）やカスタムヘッダーを含むリクエストでは、ブラウザが事前に `OPTIONS` リクエストを送信してサーバーに許可を確認します。
-
-### `OPTIONS` リクエストを処理する例
-
-```javascript
-app.options('/api/data', cors());
-```
-
-または、手動でヘッダーを設定することもできます。
-
-```javascript
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'https://mywebsite.com');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type');
-  next();
+```ts {3}
+const app = new Hono().get("/", async (c) => {
+  c.header("Access-Control-Allow-Origin", "http://localhost:8000");
+  return c.text(`text sent from server ${Math.random()}`);
 });
 ```
+
+## Preflight リクエスト
+
+GET / POST メソッドでなかったり、特殊なヘッダーを含むリクエストでは、ブラウザが事前に `OPTIONS` リクエストを送信してサーバーにそのメソッド/ヘッダーを含むリクエストを送信してよいか許可を確認します。
+
+この `OPTIONS` リクエストを Preflight リクエストと呼ぶことがあります。
+
+[Preflight request | MDN](https://developer.mozilla.org/ja/docs/Glossary/Preflight_request)
+
+:::caution
+
+ブラウザの JavaScript からはサーバーの許可がないと送信できませんが、他の方法 (cURL を使うなど) では自由にリクエストを飛ばすことができるので、こんなものはただの飾りです。
+
+:::
+
+### `OPTIONS` リクエストの処理を含めた例
+
+```ts {11..12}
+const app = new Hono()
+  .get("/", async (c) => {
+    c.header("Access-Control-Allow-Origin", "http://localhost:8000");
+    return c.text(`text sent from server ${Math.random()}`);
+  })
+  .delete("/", async (c) => {
+    c.header("Access-Control-Allow-Origin", "http://localhost:8000");
+    return c.text("deleted!");
+  })
+  .options("/", async (c) => {
+    c.header("Access-Control-Allow-Origin", "http://localhost:8000");
+    c.header("Access-Control-Allow-Methods", "GET,DELETE");
+    return c.body(null);
+  });
+```
+
+複数オリジンやパターンでオリジンを許可したい場合、 `Access-Control-Allow-Origin` の仕様上直接は記述できないので、こちら側でオリジンを計算して返しましょう。
+
+またその時は、Preflight リクエストがキャッシュされるのを防ぐために、 `Vary: Origin` のヘッダーもつける必要があります。
+
+Hono や Express ではこういうのを自動でやってくれる `cors` ミドルウェアがあるので、学習目的以外ではそっちを使うことが多いですね。
+
+## CORS で多いミス
+
+- スキームを書かずに指定しようとしている
+  - `http://localhost:8000` ではなく、 `localhost:8000` と書いている
 
 ## まとめ
 
@@ -83,4 +104,13 @@ app.use((req, res, next) => {
 
 この基本を押さえれば、CORS エラーの原因を特定しやすくなります！
 
+## Cookie のドメイン制限
 
+Cookie の `Domain` 属性は、 CORS のドメイン制限と挙動が異なります。
+
+具体的には、
+
+- `Domain` 属性を指定しない場合、全く同じドメインからのリクエストのみ許可
+- `Domain` 属性にドメインを指定する場合、`Domain` で終わるドメインのサブドメインはすべて許可
+
+詳細: [Cookie の送信先の定義 | MDN](https://developer.mozilla.org/ja/docs/Web/HTTP/Guides/Cookies#cookie_%E3%81%AE%E9%80%81%E4%BF%A1%E5%85%88%E3%81%AE%E5%AE%9A%E7%BE%A9)
