@@ -1,12 +1,39 @@
 ---
-title: バリデーションとその重要性
-draft: true
+title: バリデーションとTypeScript の見かけ上の型
 ---
 import { Tabs, TabItem } from "@astrojs/starlight/components";
 
-バリデーションは必要！ (TODO: 導入を考える)
+(注意: このページは中心部分は完成してるけど、 Wrapper (導入とか) がまだ不足してるよ！)
 
-# バリデーションをしてみる
+## TypeScript ではなぜ不十分か
+
+TypeScript は、一見完全に型がついてるように見えるよね。
+
+```ts title="index.ts"
+const num: number = 10 as any; // "10" as any に置き換えてみて
+num.toFixed(2); // -> '10.00'
+```
+
+でも、この型はコンパイル時のみに存在するもので、実行時には完全に消えてるよ。
+
+```sh
+bunx tsc ./index.ts --outFile ./out.js
+```
+
+```js title="out.js"
+const num = 10;
+num.toFixed(2);
+```
+
+これは、 Bun や Deno などの TypeScript を直接実行できると謳っているランタイムでも同じ。
+
+バリデーションをしないと、例えばパスワード認証スキップとかの荒業ができるよ。 (複雑なので詳細は発展演習に回すね)
+
+なので、バリデーションは必要！
+
+(NOTE from devs: 導入は適当だけど、必要なのは正しいよ。)
+
+## バリデーションをしてみる
 
 では、実際に TypeScript でスキーマを作り、既存のアプリケーションにバリデーションを追加してみよう。
 
@@ -86,7 +113,7 @@ app.patch("/users/:id", async (c) => {
     公式ドキュメントを参考のこと。
 
     [https://typia.io/docs/setup/](https://typia.io/docs/setup/)
-    ```ts {1} "typia.assert"
+    ```ts {1} /typia.assert<.+>/
     import typia from "typia";
     
     app.patch("/users/:id", async (c) => {
@@ -105,6 +132,8 @@ app.patch("/users/:id", async (c) => {
     ```
   </TabItem>
 </Tabs>
+
+## (以下蛇足) Hono のヘルパー関数
 
 ちなみに、Hono だともっと便利なバリデーターが提供されてるよ。
 
@@ -200,7 +229,7 @@ app.patch("/users/:id", async (c) => {
   </TabItem>
 </Tabs>
 
-# 演習問題 (発展)
+## 演習問題 (発展)
 
 バリデーションのない脆弱なアプリケーション `exercises/t1-validation.hack-this` をハックしてみよう。
 
