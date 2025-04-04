@@ -150,7 +150,8 @@ export default function App() {
 			<button onClick={() => setRunning(true)}>Start</button>
 			<button
 				onClick={() => {
-					setRunning(false), clearInterval(timerID);
+					setRunning(false);
+					clearInterval(timerID);
 				}}
 			>
 				Stop
