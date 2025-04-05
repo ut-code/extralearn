@@ -123,7 +123,7 @@ PC と Android の Chrome では、PWA のインストールのポップアッ�
 (iOS ユーザーと Chrome 以外のブラウザについてはそのような API は実装されておらず、ブラウザの ホーム画面に追加 ボタンを押すよう誘導するくらいしかできません)
 
 JavaScript から PWA のインストールを呼び出すには、まず `beforeinstallprompt` イベントのイベントハンドラを作成します。
-そのイベントハンドラでは、引数に渡されるイベントオブジェクト ([BeforeInstallPromptEvent (MDN)](https://developer.mozilla.org/en-US/docs/Web/API/BeforeInstallPromptEvent)) を変数に保存します。
+そのイベントハンドラでは、引数に渡されるイベントオブジェクト ([BeforeInstallPromptEvent](https://developer.mozilla.org/en-US/docs/Web/API/BeforeInstallPromptEvent)) を変数に保存します。
 
 ```html title="index.html"
 <script>

@@ -57,7 +57,7 @@ self.addEventListener("fetch", (event) => {
     ```js
     event.waitUntil(promise);
     ```
-    と記述し promise の完了までイベントを延長する必要があります。([ExtendableEvent.waitUntil (MDN)](https://developer.mozilla.org/ja/docs/Web/API/ExtendableEvent/waitUntil))
+    と記述し promise の完了までイベントを延長する必要があります。([ExtendableEvent.waitUntil](https://developer.mozilla.org/ja/docs/Web/API/ExtendableEvent/waitUntil))
 :::
 
 :::tip
@@ -72,11 +72,11 @@ self.addEventListener("fetch", (event) => {
 
 ### 初回アクセス時
 
-* このページを開くと、 [`navigator.serviceWorker.register()` (MDN)](https://developer.mozilla.org/ja/docs/Web/API/ServiceWorkerContainer/register) を呼び出すことにより、サービスワーカーとして実行するファイルを登録します。
-    * 返り値は [ServiceWorkerRegistration (MDN)](https://developer.mozilla.org/ja/docs/Web/API/ServiceWorkerRegistration) のプロミスで、サービスワーカーがインストール中かどうか、アクティブかどうかなどの情報が得られます。
+* このページを開くと、 [`navigator.serviceWorker.register()`](https://developer.mozilla.org/ja/docs/Web/API/ServiceWorkerContainer/register) を呼び出すことにより、サービスワーカーとして実行するファイルを登録します。
+    * 返り値は [ServiceWorkerRegistration](https://developer.mozilla.org/ja/docs/Web/API/ServiceWorkerRegistration) のプロミスで、サービスワーカーがインストール中かどうか、アクティブかどうかなどの情報が得られます。
 * ブラウザは sw.js をフェッチし、サービスワーカーとして実行します。
     * sw.js では `self` に対して install イベント、 activate イベント、 fetch イベント のイベントハンドラーを設定します。
-    * この `self` は [ServiceWorkerGlobalScope (MDN)](https://developer.mozilla.org/ja/docs/Web/API/ServiceWorkerGlobalScope) 型です。
+    * この `self` は [ServiceWorkerGlobalScope](https://developer.mozilla.org/ja/docs/Web/API/ServiceWorkerGlobalScope) 型です。
 * 初回の実行なので、まずサービスワーカーが「インストール」され、 install イベントが実行されます。
 * install イベントが完了したらサービスワーカーは「有効化」され、 activate イベントが実行されます。
 * activate イベントが完了したら以降このサービスワーカーが有効でありページを「制御」できるようになります。具体的に何ができるかは後述します。
@@ -90,12 +90,12 @@ self.addEventListener("fetch", (event) => {
 * もしフェッチした sw.js の中身が1文字でも変わっている場合、新しいサービスワーカーが「インストール」され、 install イベントが実行されます。
 この間以前のサービスワーカーは有効なままです。
 * 初回と異なり、以前のサービスワーカーによって制御されているページ (タブ) がすべて閉じられるまでの間、新しいサービスワーカーの有効化は始まりません。
-    * install イベントハンドラーの中で [`self.skipWaiting()` (MDN)](https://developer.mozilla.org/ja/docs/Web/API/ServiceWorkerGlobalScope/skipWaiting) を呼び出すことにより、これをスキップすることが可能です。
+    * install イベントハンドラーの中で [`self.skipWaiting()`](https://developer.mozilla.org/ja/docs/Web/API/ServiceWorkerGlobalScope/skipWaiting) を呼び出すことにより、これをスキップすることが可能です。
         * `skipWaiting()` はプロミスを返しますが、 await や waitUntil() する必要はないです。
 * 新しいサービスワーカーが「有効化」され、 activate イベントが実行されます。
 * 初回と異なり、activate イベントが完了したあとこのサービスワーカーがページを「制御」するのは `register()` が成功したあとに開かれたページに対してのみです。
     * ウェブページと Service Worker を両方変更した場合に、整合性をとるためですかね。
-    * activate イベントハンドラの中で [`self.clients.claim()` (MDN)](https://developer.mozilla.org/ja/docs/Web/API/Clients/claim) を呼び出すことにより、すでに開いているページに対しても新しいサービスワーカーを適用することができます。
+    * activate イベントハンドラの中で [`self.clients.claim()`](https://developer.mozilla.org/ja/docs/Web/API/Clients/claim) を呼び出すことにより、すでに開いているページに対しても新しいサービスワーカーを適用することができます。
         * `claim()` はプロミスを返し、これを `event.waitUntil()` で待機する必要があります。
 
 ## サービスワーカーでページを制御する
@@ -108,8 +108,8 @@ self.addEventListener("fetch", (event) => {
 ### レスポンスを返す
 
 サービスワーカー内でリクエストを受け取りレスポンスを返すのは、 fetch イベントのイベントハンドラーです。
-引数には [FetchEvent (MDN)](https://developer.mozilla.org/ja/docs/Web/API/FetchEvent) が渡されます。
-`event.request` でリクエスト ([Request (MDN)](https://developer.mozilla.org/ja/docs/Web/API/Request)) が得られ、`event.respondWith(response)` でレスポンス ([Response (MDN)](https://developer.mozilla.org/ja/docs/Web/API/Response)) を返します。
+引数には [FetchEvent](https://developer.mozilla.org/ja/docs/Web/API/FetchEvent) が渡されます。
+`event.request` で[リクエスト](https://developer.mozilla.org/ja/docs/Web/API/Request)が得られ、`event.respondWith(response)` で[レスポンス](https://developer.mozilla.org/ja/docs/Web/API/Response)を返します。
 
 ```js title="sw.js"
 self.addEventListener("fetch", (event) => {
@@ -155,5 +155,5 @@ self.addEventListener("fetch", (event) => {
 ### キャッシュストレージ
 
 サービスワーカーがページや静的なアセットファイルをストレージに保存しておき、サーバーの代わりにレスポンスを返すことで、端末がオフラインやネットワークが遅い環境でも高速にページを読み込むことができるようになります。
-こういった用途のためサービスワーカー内で使えるストレージが [CacheStorage (MDN)](https://developer.mozilla.org/ja/docs/Web/API/CacheStorage) です。 Request をキーとし、対応する Response を保存しておくことができます。
+こういった用途のためサービスワーカー内で使えるストレージが [CacheStorage](https://developer.mozilla.org/ja/docs/Web/API/CacheStorage) です。 Request をキーとし、対応する Response を保存しておくことができます。
 
