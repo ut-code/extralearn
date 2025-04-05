@@ -1,0 +1,13 @@
+<html>
+  <head>
+    <title>SW sample</title>
+  </head>
+  <body>
+    hello, world!
+    <script>
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("/sw.js");
+      }
+    </script>
+  </body>
+</html>
