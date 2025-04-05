@@ -1,0 +1,34 @@
+<html>
+  <head>
+    <title>PWA and SW sample</title>
+    <link rel="manifest" href="/manifest.json" />
+  </head>
+  <body>
+    hello, world!
+    <button id="install-button">インストール</button>
+    <script>
+      let installPrompt;
+      window.onbeforeinstallprompt = (event) => {
+        // event を変数に保存する
+        installPrompt = event;
+        // ブラウザがデフォルトで表示するインストールのポップアップを無効化
+        event.preventDefault();
+      };
+
+      document.getElementById("install-button").onclick = () => {
+        if (installPrompt) {
+          installPrompt.prompt();
+          installPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === "accepted") {
+              console.log("ユーザーがインストールを承認しました");
+              // todo: インストールボタンを非表示にするなどの処理を入れる
+            } else {
+              console.log("ユーザーがインストールを拒否しました");
+            }
+          });
+          installPrompt = null; // prompt() は2回以上呼び出すことはできません
+        }
+      };
+    </script>
+  </body>
+</html>
