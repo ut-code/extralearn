@@ -1,13 +1,9 @@
 ---
-title: ウェブサイトをアプリ化しよう (PWA と Service Worker)
+title: ウェブサイトのアプリ化 1 (PWA)
 ---
 
 PWA (Progressive Web App) は、ウェブサイトをブラウザー内で利用するのではなく、端末にインストールしてアプリのように利用することができる技術です。
-端的に言えばウェブサイトのブックマークをホーム画面に置くのと同じような感じですが、 PWA は単なるブックマークとは違いブラウザーとは独立した画面で(つまり、フルスクリーンで)開きます。
-さらにそれに加えてオフラインでの利用や OS のプッシュ通知機能なども使用できるため、ネイティブアプリと同等の体験を提供することができます。
-
-PWA のウェブサイトをオフラインで動作させたりプッシュ通知を処理するために用いられる技術が、Service Worker です。
-Service Worker 自体は PWA とは独立した概念であり、PWA に Service Worker が必須というわけではありませんが、両者はいっしょに用いられることが多いです。
+端的に言えばウェブサイトのブックマークをホーム画面に置くのと同じような感じですが、 PWA は単なるブックマークとは違いブラウザーとは独立した画面で (つまり、フルスクリーンで) 開きます。
 
 ## PWA を作る
 
@@ -59,7 +55,7 @@ Service Worker 自体は PWA とは独立した概念であり、PWA に Service
 ```
 
 マニフェストファイルの内容としては上に示した項目が最低限必須なものですが、これ以外に `short_name` (ホーム画面で表示される略称) や `theme_color`、`background_color` などの項目を追加することもできます。
-詳細は[こちら](https://web.dev/learn/pwa/web-app-manifest?hl=ja)
+詳細は [ウェブアプリ マニフェスト | web.dev](https://web.dev/learn/pwa/web-app-manifest?hl=ja)
 
 :::tip
 * マニフェストファイルのファイル名や配置するパスに決まりはありませんが、「manifest.json」や「〜.webmanifest」がよく用いられます。
@@ -90,7 +86,7 @@ iOS ではウェブマニフェストとは別に HTML のメタタグで `apple
 ## PWA のインストール
 
 以上のようにマニフェストファイルが正しく用意されていれば、ウェブサイトをPWAとしてインストールできるはずです。
-PWA をインストールするには、ウェブサイトが HTTPS または localhost でホストされている必要があります。
+PWA をインストールするには、ウェブサイトが HTTPS または localhost (ポートは任意) でホストされている必要があります。
 PC での動作確認は localhost で行えばよいですが、スマホ等別の端末での動作確認をするには https が使えるようにデプロイする必要があります。
 
 ### PC の Chrome の場合
@@ -127,7 +123,7 @@ PC と Android の Chrome では、PWA のインストールのポップアッ�
 (iOS ユーザーと Chrome 以外のブラウザについてはそのような API は実装されておらず、ブラウザの ホーム画面に追加 ボタンを押すよう誘導するくらいしかできません)
 
 JavaScript から PWA のインストールを呼び出すには、まず `beforeinstallprompt` イベントのイベントハンドラを作成します。
-そのイベントハンドラでは、引数に渡されるイベントオブジェクト ([BeforeInstallPromptEvent](https://developer.mozilla.org/en-US/docs/Web/API/BeforeInstallPromptEvent)) を変数に保存します。
+そのイベントハンドラでは、引数に渡されるイベントオブジェクト ([BeforeInstallPromptEvent (MDN)](https://developer.mozilla.org/en-US/docs/Web/API/BeforeInstallPromptEvent)) を変数に保存します。
 
 ```html title="index.html"
 <script>
