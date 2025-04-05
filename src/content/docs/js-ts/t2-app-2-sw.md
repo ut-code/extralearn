@@ -6,15 +6,20 @@ title: ウェブサイトのアプリ化 2 (Service Worker)
 例えばオフラインの環境では「ページを開けません」といった表示になり、全くアプリっぽさがありません。
 
 Service Worker という技術を用いることにより、ウェブサイトをオフラインで動作させたりプッシュ通知を処理することができ、ネイティブアプリと同等の体験を提供することができます。
-Service Worker 自体は PWA とは独立した概念であり、PWA に Service Worker が必須というわけではありませんが、両者はいっしょに用いられることが多いです。
+サービスワーカー自体は PWA とは独立した概念であり、PWA に Service Worker が必須というわけではありませんが、両者はいっしょに用いられることが多いです。
 
 :::tip
-以前は Service Worker がないと PWA アプリとして認識されなかったようです (そう書かれている記事が多いです) が、現在 (2025年4月現在) はそんなことはありません。
+以前はサービスワーカーがないと PWA アプリとして認識されなかったようです (そう書かれている記事が多いです) が、現在 (2025年4月現在) はそんなことはありません。
 :::
 
-## Service Worker の基本
+:::caution
+このページではプッシュ通知についてはまだ書いていません
+(そのうち誰か追記する? 別ページ?)
+:::
 
-Service Worker はウェブページとは独立して動作する JavaScript のコードです。
+## サービスワーカーの基本
+
+サービスワーカーはウェブページとは独立して動作する JavaScript のコードです。
 
 以下に例を示します。
 
@@ -62,6 +67,8 @@ self.addEventListener("fetch", (event) => {
 
 :::tip
 * サービスワーカーはクライアントで動作する js ファイルなので、モジュールを import したり TypeScript を使いたい場合には、フロントエンド開発の場合と同様 webpack 等を用いて js ファイルにバンドルする必要があります。おそらく設定ファイルもソースコードもフロントエンドとは分けて扱うことになるでしょう。
+* sw.js 内で使っている `self` は [ServiceWorkerGlobalScope](https://developer.mozilla.org/ja/docs/Web/API/ServiceWorkerGlobalScope) です。
+    * これはクライアントにおける `window` に相当するもので、 `window` と同様 `self` のプロパティは `self` を省略してグローバルにアクセスすることもできます。
 * TypeScript で `self` の型を認識させるためには
     ```ts
     declare const self: ServiceWorkerGlobalScope;
@@ -76,7 +83,6 @@ self.addEventListener("fetch", (event) => {
     * 返り値は [ServiceWorkerRegistration](https://developer.mozilla.org/ja/docs/Web/API/ServiceWorkerRegistration) のプロミスで、サービスワーカーがインストール中かどうか、アクティブかどうかなどの情報が得られます。
 * ブラウザは sw.js をフェッチし、サービスワーカーとして実行します。
     * sw.js では `self` に対して install イベント、 activate イベント、 fetch イベント のイベントハンドラーを設定します。
-    * この `self` は [ServiceWorkerGlobalScope](https://developer.mozilla.org/ja/docs/Web/API/ServiceWorkerGlobalScope) 型です。
 * 初回の実行なので、まずサービスワーカーが「インストール」され、 install イベントが実行されます。
 * install イベントが完了したらサービスワーカーは「有効化」され、 activate イベントが実行されます。
 * activate イベントが完了したら以降このサービスワーカーが有効でありページを「制御」できるようになります。具体的に何ができるかは後述します。
@@ -105,11 +111,14 @@ self.addEventListener("fetch", (event) => {
 ![ミドルウェア プロキシとしての Service Worker](https://web.dev/static/learn/pwa/service-workers/image/a-service-worker-a-middl-982e684894b75_720.png?hl=ja)
 (画像は [Service Worker | web.dev](https://web.dev/learn/pwa/service-workers?hl=ja) より)
 
-### レスポンスを返す
+:::tip
+例外として、クライアントがサービスワーカー自体の js ファイルをフェッチするリクエストはサービスワーカーを無視します。
+したがってサーバーに置かれているサービスワーカーの js ファイルが更新された場合には新しいサービスワーカーのインストールは確実に行われます。
+:::
 
 サービスワーカー内でリクエストを受け取りレスポンスを返すのは、 fetch イベントのイベントハンドラーです。
 引数には [FetchEvent](https://developer.mozilla.org/ja/docs/Web/API/FetchEvent) が渡されます。
-`event.request` で[リクエスト](https://developer.mozilla.org/ja/docs/Web/API/Request)が得られ、`event.respondWith(response)` で[レスポンス](https://developer.mozilla.org/ja/docs/Web/API/Response)を返します。
+`event.request` で [Request](https://developer.mozilla.org/ja/docs/Web/API/Request) が得られ、`event.respondWith(response)` で [Response](https://developer.mozilla.org/ja/docs/Web/API/Response) を返します。
 
 ```js title="sw.js"
 self.addEventListener("fetch", (event) => {
@@ -152,8 +161,86 @@ self.addEventListener("fetch", (event) => {
 [Hono](https://hono.dev/docs/getting-started/service-worker) などサービスワーカーで動作する Web サーバーフレームワークもあります。
 :::
 
-### キャッシュストレージ
+## キャッシュストレージ
 
 サービスワーカーがページや静的なアセットファイルをストレージに保存しておき、サーバーの代わりにレスポンスを返すことで、端末がオフラインやネットワークが遅い環境でも高速にページを読み込むことができるようになります。
-こういった用途のためサービスワーカー内で使えるストレージが [CacheStorage](https://developer.mozilla.org/ja/docs/Web/API/CacheStorage) です。 Request をキーとし、対応する Response を保存しておくことができます。
 
+こういった用途のためサービスワーカー内で使えるストレージが [CacheStorage](https://developer.mozilla.org/ja/docs/Web/API/CacheStorage) です。
+キャッシュストレージは Request をキーとし、対応する Response を保存しておくことができます。
+キャッシュストレージには任意の名前をつけて複数作成することができます。
+
+:::tip
+キャッシュストレージはクライアント側の JavaScript でも利用可能です。(`window.caches`)
+:::
+
+### キャッシュストレージに保存する
+
+[`Cache.put()`](https://developer.mozilla.org/ja/docs/Web/API/Cache/put) で Request と Response のペアを保存します。
+以下の例では `/` に fetch リクエストをし、レスポンスを `v1` という名前のキャッシュストレージに保存します。
+
+```js
+const cache = await self.caches.open("v1");
+const res = await fetch("/");
+await cache.put("/", res);
+```
+
+:::caution
+`cache.put()` に渡した Response オブジェクトはその後使用できません。
+例えばキャッシュに保存したあとそれを `event.respondWith()` にも渡すというように使いまわしたい場合は、 [`Response.clone()`](https://developer.mozilla.org/ja/docs/Web/API/Response/clone) で複製する必要があります。
+:::
+
+リソースを fetch してそのままキャッシュストレージに保存するという処理は、[`Cache.add()`](https://developer.mozilla.org/ja/docs/Web/API/Cache/add) を使ってよりかんたんに書けます。
+
+```js
+const cache = await self.caches.open("v1");
+await cache.add("/");
+```
+
+[`Cache.addAll()`](https://developer.mozilla.org/ja/docs/Web/API/Cache/addAll) を使うと指定した複数の URL をすべて fetch して保存することができます。
+オフラインでも動作させたいアプリの場合は、サービスワーカーの install イベントの中で `addAll` を実行する以下のようなパターンが一般的です。
+
+```js
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    self.caches.open("v1").then((cache) => {
+      cache.addAll([
+        // ページの表示に必要なファイルをすべて列挙する
+        "/",
+        "/styles.css",
+        "/hoge.js",
+        "/fuga.js",
+        "/assets/piyo.png",
+      ]);
+    })
+  );
+});
+```
+
+### 保存されているレスポンスを返す
+
+[`Cache.match()`](https://developer.mozilla.org/ja/docs/Web/API/Cache/match) でキャッシュストレージに保存されているレスポンス (のプロミス) を得られます。
+一致するものが見つからなかった場合 undefined が返ります。
+
+例えばキャッシュストレージにレスポンスが保存されていればそれを返し、なければ 404 を返す、つまり完全にオフライン用の動作をするサービスワーカーは以下のように書けます。
+
+```js
+self.addEventListener("fetch", (event) => {
+  event.respondWith(
+    (async () => {
+      const cache = await self.caches.open("v1");
+      const res = await cache.match(event.request);
+      if (res) {
+        return res;
+      } else {
+        return new Response("not found", { status: 404 });
+      }
+    })(),
+  );
+});
+```
+
+:::caution
+キャッシュストレージはキャッシュという名前ですが時間経過で自動的に削除されるというような機能はありません。ただのストレージです。
+そのため上の例のように install イベントでページと静的アセットをすべて保存して、 fetch イベントで常にそれをレスポンスとして返すようにした場合、ウェブサイトを更新してもクライアント側では永遠に更新されないことになります。
+(サービスワーカーの js ファイルが更新されれば install イベントが再度実行されキャッシュが新しくなります)
+:::
