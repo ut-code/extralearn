@@ -10,4 +10,25 @@ hero:
     - text: 始める
       link: /core/t1-rdb-n-to-1
       icon: right-arrow
+
+    - text: 順番に読む
+      link: /sequential
+      variant: secondary
 ---
+
+import { Card, CardGrid } from "@astrojs/starlight/components";
+
+<CardGrid stagger>
+  <Card title="最新技術のキャッチアップ" icon="open-book">
+    ut.code(); Learn で学習するよりも一歩先のツールを身につけます。
+  </Card>
+  <Card title="選択肢を広げる" icon="cloud-download">
+    ut.code(); Learn では最低限の技術しか扱いません。より幅広い技術を触って、選択肢を広げましょう。
+  </Card>
+  <Card title="手元で再現するチュートリアル" icon="pencil">
+    実際に手元で動かしてみることが、理解の助けになります。
+  </Card>
+  <Card title="失敗のデータベース" icon="warning">
+    巨人がいてこそ、その肩の上に乗ることができます。
+  </Card>
+</CardGrid>

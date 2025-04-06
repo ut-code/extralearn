@@ -2,6 +2,10 @@
 
 ut.code(); Learn とプロジェクトで使われている最新技術のギャップを埋める
 
+## 注意
+
+- 新規ページ作成後は、 `/docs/indexes/sequential.md` と `/docs/indexes/grouped.md` に追加してください。
+
 ## Deploy
 
 Cloudflare Pages で自動デプロイされています。

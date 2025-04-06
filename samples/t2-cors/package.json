@@ -1,0 +1,28 @@
+{
+  "name": "t2-cors",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "trap 'kill 0' EXIT; bun dev:web & bun dev:server & wait",
+    "dev:web": "vite --port 8000",
+    "dev:server": "PORT=3000 bun run --hot ./server.ts",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^5.0.3",
+    "@tsconfig/svelte": "^5.0.4",
+    "svelte": "^5.20.2",
+    "svelte-check": "^4.1.4",
+    "typescript": "~5.7.2",
+    "vite": "^6.2.0"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.1.2",
+    "daisyui": "^5.0.12",
+    "hono": "^4.7.5",
+    "tailwindcss": "^4.1.2"
+  }
+}
