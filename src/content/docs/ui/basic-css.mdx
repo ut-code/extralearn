@@ -1,0 +1,80 @@
+---
+title: CSSの復習とアニメーション
+---
+
+import MultipleChoice from "../../../components/MultipleChoice.astro";
+import Option from "../../../components/Option.astro";
+
+## ut.code(); Learnの復習
+Q1. メディアクエリはどんなときに使いますか？
+  <MultipleChoice>
+      <Option isCorrect>
+        画面サイズによって異なるスタイルを適用させたいとき
+      </Option>
+      <Option>
+        JavaScript を無効にしたいとき
+      </Option>
+      <Option>
+        画像を圧縮したいとき
+      </Option>
+  </MultipleChoice>
+
+Q2. 次のうち、画面幅が 400px のときに適用されるメディアクエリはどれですか？
+  <MultipleChoice>
+      <Option>
+        `@media (max-width: 300px)`
+      </Option>
+      <Option isCorrect>
+        `@media (max-width: 500px)`
+      </Option>
+      <Option>
+        `@media (min-width: 500px)`
+      </Option>
+  </MultipleChoice>
+
+Q3. フレックスボックスを利用する際、`display: flex` を適用する要素は、配置したい要素の何にあたりますか？
+  <MultipleChoice>
+      <Option>
+        子要素
+      </Option>
+      <Option isCorrect>
+        親要素
+      </Option>
+      <Option>
+        配置したい要素自身
+      </Option>
+  </MultipleChoice>
+
+Q4. グリッドを利用する際、列の幅を指定するために使うプロパティはどれ？
+  <MultipleChoice>
+      <Option isCorrect>
+        `grid-template-columns`
+      </Option>
+      <Option>
+        `grid-column`
+      </Option>
+      <Option>
+        `grid-columns-width`
+      </Option>
+  </MultipleChoice>
+
+Q5. `grid-column: 3 / 4` と書いた場合、その要素はグリッドの何列目に配置されますか？
+  <MultipleChoice>
+      <Option>
+        3, 4 列目
+      </Option>
+      <Option>
+        4 列目
+      </Option>
+      <Option isCorrect>
+        3 列目
+      </Option>
+  </MultipleChoice>
+
+全問正解できなかった方は、ut.code(); Learn の[CSS による配置(発展)](https://learn.utcode.net/docs/browser-apps/css-arrangement/) をもう一度読むことをオススメします。
+
+## アニメーション
+CSS を用いれば、簡単なアニメーションを作成することもできます。
+
+### keyframes
+まず、[keyframes](https://developer.mozilla.org/en-US/docs/Web/CSS/@keyframes) を用いたアニメーションについて説明します。
