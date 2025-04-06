@@ -39,10 +39,6 @@ export default defineConfig({
           autogenerate: { directory: "coding-style" },
         },     
         {
-          label: "UI",
-          autogenerate: { directory: "ui" },
-        },
-        {
           label: "マネジメント",
           autogenerate: { directory: "management" },
         },
