@@ -1,0 +1,208 @@
+---
+title: CSSの復習とアニメーション
+---
+
+import MultipleChoice from "../../../components/MultipleChoice.astro";
+import Option from "../../../components/Option.astro";
+
+## ut.code(); Learnの復習
+Q1. メディアクエリはどんなときに使いますか？
+  <MultipleChoice>
+      <Option isCorrect>
+        画面サイズによって異なるスタイルを適用させたいとき
+      </Option>
+      <Option>
+        JavaScript を無効にしたいとき
+      </Option>
+      <Option>
+        画像を圧縮したいとき
+      </Option>
+  </MultipleChoice>
+
+Q2. 次のうち、画面幅が 400px のときに適用されるメディアクエリはどれですか？
+  <MultipleChoice>
+      <Option>
+        `@media (max-width: 300px)`
+      </Option>
+      <Option isCorrect>
+        `@media (max-width: 500px)`
+      </Option>
+      <Option>
+        `@media (min-width: 500px)`
+      </Option>
+  </MultipleChoice>
+
+Q3. フレックスボックスを利用する際、`display: flex` を適用する要素は、配置したい要素の何にあたりますか？
+  <MultipleChoice>
+      <Option>
+        子要素
+      </Option>
+      <Option isCorrect>
+        親要素
+      </Option>
+      <Option>
+        配置したい要素自身
+      </Option>
+  </MultipleChoice>
+
+Q4. グリッドを利用する際、列の幅を指定するために使うプロパティはどれ？
+  <MultipleChoice>
+      <Option isCorrect>
+        `grid-template-columns`
+      </Option>
+      <Option>
+        `grid-column`
+      </Option>
+      <Option>
+        `grid-columns-width`
+      </Option>
+  </MultipleChoice>
+
+Q5. `grid-column: 3 / 4` と書いた場合、その要素はグリッドの何列目に配置されますか？
+  <MultipleChoice>
+      <Option>
+        3, 4 列目
+      </Option>
+      <Option>
+        4 列目
+      </Option>
+      <Option isCorrect>
+        3 列目
+      </Option>
+  </MultipleChoice>
+
+全問正解できなかった方は、ut.code(); Learn の[CSS による配置(発展)](https://learn.utcode.net/docs/browser-apps/css-arrangement/) をもう一度読むことをオススメします。
+
+## アニメーション
+CSS を用いれば、簡単なアニメーションを作成することもできます。
+
+### `@keyframes`
+まず、[@keyframes](https://developer.mozilla.org/en-US/docs/Web/CSS/@keyframes) を用いたアニメーションについて説明します。
+```html
+<!-- index.html -->
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <title>Title</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div class="box"></div>
+  </body>
+</html>
+```
+```css
+/* style.css */
+ @keyframes example {
+  from {
+    background-color: lightcoral;
+  }
+  to {
+    background-color: lightblue;
+  }
+}
+
+.box {
+  height: 100px;
+  width: 100px;
+  background-color: black;
+  animation-name: example;
+  animation-duration: 3s;
+}
+```
+`@keyframes` でアニメーションを定義して、`animation-name` プロパティでアニメーションを適用します。
+% を用いて、アニメーションを定義することもできます。
+```css "33%" "67%"
+/* style.css */
+@keyframes example {
+  33% {
+    background-color: lightcoral;
+  }
+  67% {
+    background-color: lightblue;
+  }
+}
+
+.box {
+  height: 100px;
+  width: 100px;
+  background-color: black;
+  animation-name: example;
+  animation-duration: 3s;
+}
+```
+
+### transition
+次は、[transition](https://developer.mozilla.org/en-US/docs/Web/CSS/transition) について学習していきます。
+`transition` とは、CSS で要素のプロパティが変化したときに、その変化をアニメーションとして表示するためのプロパティです。
+早速例を見ていきましょう。
+```css
+/* style.css */
+.box {
+    width: 100px;
+    height: 100px;
+    background-color: blue;
+    transition: background-color 0.5s ease; 
+  }
+  
+  .box:hover {
+    background-color: red; 
+  }
+  
+```
+
+この例では `background-color` プロパティが変更されたときにのアニメーションが `transition` プロパティで指定されています。
+`box` という `div` 要素がホバーされたときに `background-color` が変更され、そのときに `transition` プロパティによって、0.5 秒かけて変化します。
+変化する際の挙動については、`ease` という**タイミング関数**で指定されています。`ease` 以外にも `ease-in-out` や `ease-out` などがあります。
+タイミング関数の後に [transition-delay](https://developer.mozilla.org/en-US/docs/Web/CSS/transition-delay) や [transition-behavior](https://developer.mozilla.org/en-US/docs/Web/CSS/transition-behavior) を指定することもできます。 
+
+## 演習
+以下のコードのコメントの下に CSS を書いて、自由にアニメーションをつけてください。
+```css
+/* style.css */
+.box {
+  height: 100px;
+  width: 100px;
+  background-color: lightblue;
+  border-radius: 50%;
+  animation-name: move;
+  animation-duration: 3s;
+  position: absolute;
+  left: 50%;
+}
+
+@keyframes move-around {
+    /* 自由にアニメーションをつけてください！ */
+}
+```
+
+例えば、このように書いたらどうなるでしょうか？
+```css 
+/* style.css */
+.box {
+  height: 100px;
+  width: 100px;
+  background-color: lightblue;
+  border-radius: 50%;
+  animation-name: move;
+  animation-duration: 3s;
+  position: absolute;
+  left: 50%;
+}
+
+@keyframes move {
+  30% {
+    left: 30%;
+    transform: translateX(-80px);
+  }
+  50% {
+    background-color: lightcoral;
+  }
+  70% {
+    left: 70%;
+    transform: translateX(50px);
+    background-color: lightgreen;
+  }
+}
+```
