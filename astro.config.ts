@@ -27,12 +27,20 @@ export default defineConfig({
           autogenerate: { directory: "web-api" },
         },
         {
+          label: "フレームワークに触れる",
+          autogenerate: { directory: "frameworks" },
+        },
+        {
           label: "周辺ツール",
           autogenerate: { directory: "toolchain" },
         },
         {
           label: "コーディングスタイル",
           autogenerate: { directory: "coding-style" },
+        },
+        {
+          label: "マネジメント",
+          autogenerate: { directory: "management" },
         },
       ],
     }),
