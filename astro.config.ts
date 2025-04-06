@@ -37,7 +37,7 @@ export default defineConfig({
         {
           label: "コーディングスタイル",
           autogenerate: { directory: "coding-style" },
-        }, 
+        },
         {
           label: "マネジメント",
           autogenerate: { directory: "management" },
