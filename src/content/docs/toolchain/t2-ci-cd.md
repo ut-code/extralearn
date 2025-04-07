@@ -80,6 +80,7 @@ git checkout -b hoge
 ```
 index.ts を以下のように編集してみましょう。
 ```ts
+// index.ts
 const hoge = 10;
 ```
 `hoge` という変数は定義されているにも関わらず、使われていません。
