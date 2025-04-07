@@ -5,7 +5,7 @@ title: GitHub Actions による CI/CD の必要性と使い方
 ## CI/CD とは？
 CI とは Continuous Integration の略で、CD とは Continuous Delivery または Continuous Deploy の略です。
 それらを組み合わせることによって、ビルドやテスト、デプロイなどを自動化することができます。
-例えば CI を使えば、push する度に自動で[リンター](https://extra.utcode.net/toolchain/t1-formatter-and-linter/)を走らせることができます。
+例えば CI を使えば、push する度に自動で[リンター](/toolchain/t1-formatter-and-linter/)を走らせることができます。
 正確な定義については、[GitHub の記事](https://github.com/resources/articles/devops/ci-cd)を参照してください。
 :::tip
 `npm ci` の ci は、clean install の略です。Continuous Integration と混同されることが多いです。
@@ -27,7 +27,7 @@ git commit -m "init"
 ```
 次に GitHub を開いて、リポジトリを作成しましょう。
 ```sh
-git remote add origin your_repository_ssh # 実際の SSH に置き換えてください
+git remote add origin your_repository_ssh # 実際の SSH の URL に置き換えてください
 git branch -M main
 git push -u origin main
 ```
