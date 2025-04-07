@@ -14,7 +14,7 @@ CI とは Continuous Integration の略で、CD とは Continuous Delivery ま�
 ## GitHub Actions を例に使ってみよう
 GitHub Actions などのツールを用いれば、CI/CD を導入することができます。ただ、2025年4月7日現在、プライベートリポジトリの GitHub Actions には利用上限があるので、リポジトリをパブリックにするか利用上限を確認するようにしてください。
 今回は push する度に Biome を走らせてみようと思います。
-ワークフローの書き方の詳細については、[公式ドキュメント](https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions)に譲ります。また、サポートされているリンターやフォーマッターについては、[公式ドキュメント](https://github.com/marketplace/actions/lint-action#supported-tools)を参照してください。
+ワークフローの書き方の詳細については、[公式ドキュメント](https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions)に譲ります。
 
 ### 環境構築
 ```sh
@@ -71,4 +71,23 @@ git add -A
 git commit -m "setup: ci"
 git push -u origin main
 ```
-GitHub を確認してください。Actions タブから Action のステータスなどの情報を確認できるはずです。
+GitHub を確認してください。Actions タブからステータスなどの情報を確認できるはずです。
+
+### 「CI が通らない」例
+このレポジトリに不適切なコードを含んだプルリクエストを出してみましょう。
+```sh
+git checkout -b hoge
+```
+index.ts を以下のように編集してみましょう。
+```ts
+const hoge = 10;
+```
+`hoge` という変数は定義されているにも関わらず、使われていません。
+push しましょう。
+```sh
+git add -A
+git commit -m "define unused variable"
+git push -u origin hoge
+```
+GitHub を開いて、プルリクエストを作成しましょう。
+Biome が実行されたら、Some checks were not successful と表示されるはずです。
