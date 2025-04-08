@@ -6,6 +6,7 @@ title: GitHub Actions による CI/CD の必要性と使い方
 CI とは Continuous Integration の略で、CD とは Continuous Delivery または Continuous Deploy の略です。
 それらを組み合わせることによって、ビルドやテスト、デプロイなどを自動化することができます。
 例えば CI を使えば、push する度に自動で[リンター](/toolchain/t1-formatter-and-linter/)を走らせることができます。
+CI がないとレビューするときに毎回手動でローカルにクローンしないといけないのですが、CI を使えばその必要もないですね！
 正確な定義については、[GitHub の記事](https://github.com/resources/articles/devops/ci-cd)を参照してください。
 :::tip
 `npm ci` の ci は、clean install の略です。Continuous Integration と混同されることが多いです。
