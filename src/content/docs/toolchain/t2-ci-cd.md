@@ -36,7 +36,7 @@ git push -u origin main
 
 ### ワークフローの定義
 ```sh
-mkdir .github/workflows
+mkdir -p .github/workflows
 touch .github/workflows/run_biome.yml
 ```
 
