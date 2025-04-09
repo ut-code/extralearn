@@ -92,6 +92,9 @@ CSS を用いれば、簡単なアニメーションを作成することもで�
   </body>
 </html>
 ```
+
+`@keyframes` でアニメーションを定義して、`animation-name` プロパティでアニメーションを適用します。
+
 ```css
 /* style.css */
  @keyframes example {
@@ -111,8 +114,9 @@ CSS を用いれば、簡単なアニメーションを作成することもで�
   animation-duration: 3s;
 }
 ```
-`@keyframes` でアニメーションを定義して、`animation-name` プロパティでアニメーションを適用します。
+
 % を用いて、アニメーションを定義することもできます。
+
 ```css "33%" "67%"
 /* style.css */
 @keyframes example {
@@ -154,7 +158,7 @@ CSS を用いれば、簡単なアニメーションを作成することもで�
 
 この例では `background-color` プロパティが変更されたときのアニメーションが `transition` プロパティで指定されています。
 `box` という `div` 要素がホバーされたときに `background-color` が変更され、そのときに `transition` プロパティによって、0.5 秒かけて変化します。
-変化する際の挙動については、`ease` という**タイミング関数**で指定されています。`ease` 以外にも `ease-in-out` や `ease-out` などがあります。
+変化する際の挙動については、`ease` という**イージング関数**で指定されています。`ease` 以外にも `ease-in-out` や `ease-out` などがあります。
 タイミング関数の後に [transition-delay](https://developer.mozilla.org/en-US/docs/Web/CSS/transition-delay) や [transition-behavior](https://developer.mozilla.org/en-US/docs/Web/CSS/transition-behavior) を指定することもできます。 
 
 ## 演習
