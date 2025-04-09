@@ -1,10 +1,23 @@
-# About
+# Extra Learn
+
+## About
 
 ut.code(); Learn とプロジェクトで使われている最新技術のギャップを埋める
 
+## 目標
+
+- 技術の存在 & 始め方を教える
+- 完全なドキュメントへのリンク
+- よくある落とし穴 & 調べにくい間違いを残す
+- ドキュメント化されていない技術の知識を残す
+
+## not 目標
+
+- すでにドキュメントのある技術の完全な教材
+
 ## 注意
 
-- 新規ページ作成後は、 `/docs/indexes/sequential.md` と `/docs/indexes/grouped.md` に追加してください。
+- 新規ページ作成後は、 `/docs/indexes/sequential.md` に追加してください。
 
 ## Deploy
 
