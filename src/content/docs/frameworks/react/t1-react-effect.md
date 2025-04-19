@@ -210,7 +210,7 @@ export default function App() {
 		const fetchData = async () => {
 			const response = await fetch("https://jsonplaceholder.typicode.com/todos/1", {
 				signal: controller.signal
-			})
+			});
 			const json = await response.json();
 			setTitle(json.title);
 			console.log("json requested");
