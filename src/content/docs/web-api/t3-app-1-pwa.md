@@ -174,3 +174,9 @@ PWA はアプリストアなどを経由せずクロスプラットフォーム�
 :::caution
 実際にこれを使ってアプリを作ったことはまだないので、そのうち誰かが追記?
 :::
+
+## よくあるミス
+
+### PWA が認識されない！
+
+[必須のマニフェストメンバー](https://developer.mozilla.org/ja/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable#%E5%BF%85%E9%A0%88%E3%81%AE%E3%83%9E%E3%83%8B%E3%83%95%E3%82%A7%E3%82%B9%E3%83%88%E3%83%A1%E3%83%B3%E3%83%90%E3%83%BC) の要件を満たしていることを確認する。特に、 _**icons には 192px および 512px のアイコンが必要です。**_

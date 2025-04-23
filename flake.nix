@@ -25,6 +25,7 @@
           pkgs.astro-language-server
           pkgs.typos
           pkgs.litecli
+          pkgs.static-web-server
         ];
       };
     });
