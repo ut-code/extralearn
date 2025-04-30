@@ -23,7 +23,7 @@
       devShells.default = pkgs.mkShell {
         inherit (prisma) env;
         packages = [
-          (bunnix.lib.${system}.fromToolVersions ./.tool-versions)
+          (bunnix.lib.${system}.fromToolVersionsFile ./.tool-versions)
           pkgs.nodejs
           pkgs.astro-language-server
           pkgs.typos

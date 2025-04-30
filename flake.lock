@@ -8,11 +8,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1746017206,
-        "narHash": "sha256-rpSWARx81sxJ0dRxg40T/ImJdROeIRNdWjP5OGadKyA=",
+        "lastModified": 1746021050,
+        "narHash": "sha256-XdM115oYpbSi3sy8SmYetLVyPiJSdDmjB5L1VDVKQlw=",
         "owner": "aster-void",
         "repo": "bunnix",
-        "rev": "51ddad4f75077ae66097c825149e03152b071014",
+        "rev": "0a50da4bd1647f883496d60ef1ad452557a9154f",
         "type": "github"
       },
       "original": {
