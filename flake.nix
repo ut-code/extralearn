@@ -5,12 +5,15 @@
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
     prisma-utils.url = "github:VanCoding/nix-prisma-utils";
+    bunnix.url = "github:aster-void/bunnix";
+    bunnix.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = {
     nixpkgs,
     flake-utils,
     prisma-utils,
+    bunnix,
     ...
   }:
     flake-utils.lib.eachDefaultSystem (system: let
@@ -20,7 +23,7 @@
       devShells.default = pkgs.mkShell {
         inherit (prisma) env;
         packages = [
-          pkgs.bun
+          (bunnix.lib.${system}.fromToolVersions ./.tool-versions)
           pkgs.nodejs
           pkgs.astro-language-server
           pkgs.typos
