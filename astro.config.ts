@@ -10,9 +10,13 @@ export default defineConfig({
     starlight({
       title: "Extra Learn",
       plugins: [starlightThemeRapidePlugin()],
-      social: {
-        github: "https://github.com/ut-code/extralearn",
-      },
+      social: [
+        {
+          icon: "github",
+          label: "GitHub",
+          href: "https://github.com/ut-code/extralearn",
+        },
+      ],
       sidebar: [
         {
           label: "中心概念",
