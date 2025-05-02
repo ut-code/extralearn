@@ -24,7 +24,7 @@ title: SSE と EventSource
 ```text
 > GET /sse HTTP/1.1
 
-< Content-Type: text/stream
+< Content-Type: text/event-stream
 <
 < event: message
 < data: {"content":"Hello!","timestamp":"2025-05-01 22:00"}
@@ -95,7 +95,7 @@ src.addEventListener("ping", (ev) => {
 
 サーバー上で、一個のイベントに複数個のリスナーをつける必要が出てくるはずです。
 
-[`BroadcastChannel`](https://developer.mozilla.org/ja/docs/Web/API/BroadcastChannel) などの Pub/Sub メッセージングモデルが使いやすいでしょう。
+[`BroadcastChannel`](https://developer.mozilla.org/ja/docs/Web/API/BroadcastChannel) や [`EventEmitter (Node.js)`](https://nodejs.org/en/learn/asynchronous-work/the-nodejs-event-emitter) などの Pub/Sub メッセージングモデルが使いやすいでしょう。
 
 ## おまけ (ベストプラクティス)
 
