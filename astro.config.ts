@@ -46,6 +46,10 @@ export default defineConfig({
           label: "マネジメント",
           autogenerate: { directory: "management" },
         },
+        {
+          label: "その他 / 趣味置き場",
+          autogenerate: { directory: "utilities" },
+        },
       ],
     }),
   ],
