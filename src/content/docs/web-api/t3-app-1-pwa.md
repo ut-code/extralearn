@@ -29,8 +29,12 @@ PWA (Progressive Web App) は、ウェブサイトをブラウザー内で利用
 ```json title="manifest.json"
 {
   "name": "Sample App",
+  "short_name": "Sample",
   "start_url": "/",
+  "id": "/",
   "display": "standalone",
+  "theme_color": "#80ffff",
+  "background_color": "#ffff80",
   "icons": [
     {
       "src": "/icon_192.png",
@@ -43,7 +47,7 @@ PWA (Progressive Web App) は、ウェブサイトをブラウザー内で利用
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
-    },
+    }
   ]
 }
 ```
@@ -54,8 +58,8 @@ PWA (Progressive Web App) は、ウェブサイトをブラウザー内で利用
 <link rel="manifest" href="/manifest.json">
 ```
 
-マニフェストファイルの内容としては上に示した項目が最低限必須なものですが、これ以外に `short_name` (ホーム画面で表示される略称) や `theme_color`、`background_color` などの項目を追加することもできます。
-詳細は [ウェブアプリ マニフェスト | web.dev](https://web.dev/learn/pwa/web-app-manifest?hl=ja)
+マニフェストファイルの内容としては上の例に示した中でも `name`, `start_url`, `display`, `icon` が必須項目です。
+詳細は [ウェブアプリ マニフェスト | web.dev](https://web.dev/learn/pwa/web-app-manifest?hl=ja) や [PWA をインストール可能にする | MDN](https://developer.mozilla.org/ja/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable) を参照してください。
 
 :::tip
 * マニフェストファイルのファイル名や配置するパスに決まりはありませんが、「manifest.json」や「〜.webmanifest」がよく用いられます。
@@ -67,7 +71,7 @@ PWA (Progressive Web App) は、ウェブサイトをブラウザー内で利用
 
 端末のホーム画面に表示されるアプリアイコンを用意する必要があります。
 アイコンはマニフェストファイルの `icons` で指定します。
-PNG 形式で 192x192 と 512x512 のアイコン画像を最低限用意しないと Chrome で動作しないようです。
+**192x192 と 512x512 のアイコン画像は最低限必須**です。
 
 Android ではアプリアイコンの形が丸や角丸など異なる場合があります。
 これに対応させるために、 `purpose` を `maskable` に設定したマスク可能なアイコンを用意する必要があります。
@@ -83,20 +87,60 @@ PC などその他の環境ではそのようなパディングは必要ない�
 
 iOS ではウェブマニフェストとは別に HTML のメタタグで `apple-touch-icon` を指定する必要があると書かれている記事が多いですが、この記事を書いている現在 (2025年4月) iOS 18 で試してみたところウェブマニフェストだけでも正しくアイコンが表示されました。
 
+### テーマカラー
+
+マニフェスト内の `theme_color` はアプリのテーマカラーを指定します。
+ここで指定した色は、ウェブサイトを PWA としてインストールしたあと、Android や iOS ではステータスバーの色に、PC ではタイトルバーの色に反映されます。
+また、iOS と Mac の Safari 及び Android の Chrome では、普通にウェブサイトとして開いた際にもアドレスバーの色に反映されます。
+
+`background_color` は PC および Android でアプリが起動してから最初のページが読み込まれるまでの間表示される背景色に反映されます。
+(iOS では反映されず、ライトモードでは白に、ダークモードでは黒になりました)
+
+テーマカラーは HTML ファイルの &lt;head&gt; の中でも指定することができます。
+マニフェストと HTML ファイルの両方で指定した場合、HTML 側の値が優先され、ページごとに色を変えることも可能です。
+(ただし、アプリが起動してから最初のページが読み込まれるまでの間はマニフェストに指定した値が使用されることになります。)
+
+```html
+<meta name="theme-color" content="#80ffff">
+```
+
+HTML ファイル内で指定されたテーマカラーは JavaScript で書き換えることもでき、実際の表示にも反映されます。
+
+```js
+document.querySelector('meta[name="theme-color"]').setAttribute("content", "#002020");
+```
+
+さらに、HTML ファイル内では以下のように記述すると OS がダークモードの場合のテーマカラーも指定することができます。
+
+```html
+<meta name="theme-color" content="#80ffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#002020" media="(prefers-color-scheme: dark)">
+```
+
+:::tip
+現在のところウェブマニフェストの側でダークモード用のテーマカラーや背景色を指定する方法はありません。
+W3C において現在[議論中](https://github.com/w3c/manifest/issues/975)のようです。
+:::
+
 ## PWA のインストール
 
-以上のようにマニフェストファイルが正しく用意されていれば、ウェブサイトをPWAとしてインストールできるはずです。
-PWA をインストールするには、ウェブサイトが HTTPS または localhost (ポートは任意) でホストされている必要があります。
+以上のようにマニフェストファイルが正しく用意されていれば、ウェブサイトを PWA としてインストールできるはずです。
+マニフェストの記述に間違いがないかを確認するには、まず PC の Chrome でインストールできるかどうかを確かめましょう。
+
+なお PWA をインストールするには、ウェブサイトが HTTPS または localhost (ポートは任意) でホストされている必要があります。
 PC での動作確認は localhost で行えばよいですが、スマホ等別の端末での動作確認をするには https が使えるようにデプロイする必要があります。
 
 ### PC の Chrome の場合
 
-PC の Chrome では、PWA に対応したウェブサイトを開くと、アドレスバーの右側に「インストール」ボタンが出現します。
-Chrome 以外のブラウザでは (同じ Chromium ベースであっても) 仕様が異なる場合があるため、まず Chrome での動作確認をおすすめします。
+PC の Chrome 及び Edge では、PWA に対応したウェブサイトを開くと、アドレスバーの右側に「インストール」ボタンが出現します。
+Chromium ベースの他のブラウザでは仕様が異なる場合があるため、まず Chrome か Edge での動作確認をおすすめします。
+
+:::caution
+マニフェストの記述が間違っていたり必須の項目が不足している場合、インストールボタンが表示されません。
+その場合は開発者ツールの「Application」タブを開くとエラーや warning の表示を確認できます。
+:::
 
 ![chrome_install](./t3-app-1/chrome_install.png)
-
-出現しない場合は、開発者ツールの「Application」タブを開くと、エラーや warning が表示されているかもしれません。
 
 ### Android の場合
 
@@ -174,9 +218,3 @@ PWA はアプリストアなどを経由せずクロスプラットフォーム�
 :::caution
 実際にこれを使ってアプリを作ったことはまだないので、そのうち誰かが追記?
 :::
-
-## よくあるミス
-
-### PWA が認識されない！
-
-[必須のマニフェストメンバー](https://developer.mozilla.org/ja/docs/Web/Progressive_web_apps/Guides/Making_PWAs_installable#%E5%BF%85%E9%A0%88%E3%81%AE%E3%83%9E%E3%83%8B%E3%83%95%E3%82%A7%E3%82%B9%E3%83%88%E3%83%A1%E3%83%B3%E3%83%90%E3%83%BC) の要件を満たしていることを確認する。特に、 _**icons には 192px および 512px のアイコンが必要です。**_
