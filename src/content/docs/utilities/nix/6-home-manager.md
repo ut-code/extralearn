@@ -1,4 +1,4 @@
 ---
-title: 6. Home Manager でパッケージをインストール
+title: 6. Home Manager を使う
 ---
 todo

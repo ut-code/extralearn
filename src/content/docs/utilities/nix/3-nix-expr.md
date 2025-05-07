@@ -12,6 +12,10 @@ Nix CLI には、 REPL (Read-Eval-Print Loop = ブラウザのコンソールの
 nix repl
 ```
 
+## REPL から退出
+
+`ctrl` + `D` で REPL を閉じます。
+
 ## Nix 式評価の基本
 
 Nix 式は、多くの関数型言語と同じように、遅延評価されます。
@@ -32,15 +36,19 @@ Nix 式は、多くの関数型言語と同じように、遅延評価されま�
 文字列
 
 ```nix
-"hello"
-# -> "hello"
-```
-```nix
 "hello, " + "nix"
 # -> "hello, nix"
 ```
+```nix
+# 複数行使う場合は '' を使う
+''
+multi-line
+string
+''
+# -> "multi-line\nstring\n"
+```
 
-配列
+リスト
 
 ```nix
 [ 1 2 ]
@@ -154,7 +162,7 @@ in
 ```nix
 # カリー化する例
 let
-  # カリー化された関数、二回呼び出して解を得る
+  # カリー化された関数: 返り値をもう一度呼び出して解を得る
   add = a: b: a + b;
 in
   add 2 3
@@ -198,6 +206,3 @@ builtins.readFile ./path.txt
 # -> "hello path\n"
 ```
 
-## REPL から退出
-
-`ctrl` + `D` で REPL を閉じます。

@@ -1,3 +1,5 @@
 ---
-title: 5. Flake を使ってバージョンを固定する
+title: 5. Nix Channel と Flake
 ---
+
+Nix のバージョン固定の方法について
