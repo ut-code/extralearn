@@ -4,11 +4,11 @@ title: 5. Nix Channel と Flake
 
 # Nix のバージョン固定方法
 
-Nix には、バージョン解決のシステムが *Nix Channel* (古い) と *Nix Flake* (新しい) の２つあります。
+Nix には、バージョン固定システムが *Nix Channel* (古い) と *Nix Flake* (新しい) の２つあります。
 
 ## Nix Channel
 
-Nix Channel は、コンピュータごとに管理される、バージョン解決システムです。
+Nix Channel は、コンピュータごとに管理される、バージョン固定システムです。
 
 ```sh
 nix-channel --list
@@ -66,7 +66,7 @@ nix flake init
 
 description は人間向けの Flake の説明です。
 
-`inputs` は、Flake の「入力」を表します。Flake の時間依存性を示し、Flake はこれを特定のコミットに固定することでバージョンを固定します。
+`inputs` は、Flake の「入力」を表します。Flake の時間依存性を示し、Flake はこれを特定の瞬間に固定することでバージョンを固定します。
 
 `outputs` が Flake のメイン部分です。引数には上で定義した `inputs` と自分自身を表す `self` を合体した Attrset が渡され、返り値は自由な Attrset です。
 
