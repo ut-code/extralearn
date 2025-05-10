@@ -14,12 +14,14 @@
     flake-utils,
     prisma-utils,
     bunnix,
-    ...
+    self,
   }:
     flake-utils.lib.eachDefaultSystem (system: let
       pkgs = nixpkgs.legacyPackages.${system};
       prisma = pkgs.callPackage ./samples/t1-rdb/prisma/prisma.nix {inherit prisma-utils;};
     in {
+      packages.hello-nix = pkgs.callPackage ./samples/nix/package.nix {};
+      packages.default = self.packages.${system}.hello-nix;
       devShells.default = pkgs.mkShell {
         inherit (prisma) env;
         packages = [
@@ -29,6 +31,7 @@
           pkgs.typos
           pkgs.litecli
           pkgs.static-web-server
+          pkgs.go
         ];
       };
     });
