@@ -35,6 +35,8 @@ Google では SEO 効果はないらしいです。(つまり、これを書く�
 
 ![utcode-learnのdescription](./t2-meta/description.png)
 
+<!-- ↑GoogleもBingも検索結果がdescriptionの文字列になっていなくて困った -->
+
 ## icon
 
 :::caution
@@ -95,6 +97,80 @@ Safari のブックマークに使用されるアイコンは上記のアイコ�
 * [ウェブマニフェスト](./t3-app-1-pwa.md)がある場合はそちらで代用でき、 `apple-touch-icon` は不要になります。
 :::
 
+## canocical / alternate
+
+同じページを指す複数の URL がある場合 (言語違い、PC 用とモバイル用、ページ内容に影響しないクエリパラメータなど)、canonical URL を指定すると検索エンジンは検索結果をその URL に統一します。
+
+また、言語違いのページを持つ場合は alternate URL としてそれぞれの言語の URL を指定します。
+
+```html title="index.html"
+<link rel="canonical" href="https://example.com/">
+<link rel="alternate" href="https://example.com/ja/" hreflang="ja">
+<link rel="alternate" href="https://example.com/en/" hreflang="en">
+```
+
+:::caution
+* 検索エンジンは必ずこの指定に従うというわけではなく、canonical 指定を無視して別の URL が検索結果に表示される場合もあります。
+* 複数の言語に対応するウェブサイトを作るには [Accept-Language](https://developer.mozilla.org/ja/docs/Web/HTTP/Reference/Headers/Accept-Language) ヘッダーを使ってユーザーの言語を判別し、それぞれの言語のページにリダイレクトするという方法が考えられますが、特に canonical に指定した URL がリダイレクトを返した場合 Bing はその URL を採用しません。
+どうしろというんだ。
+(User-Agent でクローラーを判別してその場合だけページそのものを返すとか?)
+:::
+<!-- TODO: ↑canonicalのもっと正しい使い方あったらだれかおしえて-->
+
+## robots
+
+検索エンジンのクローラーに対して、ページをインデックスするかどうかを指定します。
+詳細は [標準メタデータ名 | MDN](https://developer.mozilla.org/ja/docs/Web/HTML/Reference/Elements/meta/name#%E3%81%9D%E3%81%AE%E4%BB%96%E3%81%AE%E3%83%A1%E3%82%BF%E3%83%87%E3%83%BC%E3%82%BF%E5%90%8D) を参照してください。
+
+```html title="index.html"
+<meta name="robots" content="noindex, nofollow">
+```
+
+### robots.txt
+
+以下のような robots.txt という名前のファイルをドメイン直下に用意することで、クローラーに対してインデックスしてほしくない URL をまとめて指定することができます。
+
+```txt title="robots.txt"
+User-agent: *
+Disallow: /private/
+```
+
+メタタグの robots と robots.txt ファイルが両方指定されている場合、両方でインデックスが許可されていないとインデックスされません。
+
+## sitemap
+
+ドメイン直下の sitemap.xml という名前のファイルでウェブサイト内のページの一覧を指定することで、検索エンジンにウェブサイト全体を確実にクロールしてもらうことができます。
+
+詳細は [Sitemaps XML Format](https://www.sitemaps.org/protocol.html) を参照してください。
+
+```xml title="sitemap.xml"
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+        <loc>http://example.com/</loc>
+        <lastmod>2025-01-01</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>http://example.com/hoge/</loc>
+        <lastmod>2025-01-01</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+</urlset>
+```
+
+robots.txt に以下のように sitemap を指定することで、クローラーに sitemap.xml の場所を教えることができます。
+
+```txt title="robots.txt"
+User-agent: *
+Disallow: /private/
+Sitemap: https://example.com/sitemap.xml
+```
+
+新しく作られたウェブサイトでまだ存在が認知されていない場合は、Google Search Console や Bing Webmaster Tools にサイトマップを送信することで早くクロールしてもらうことができます。
+
 ## OGP
 
 OGP (Open Graph Protocol) のタグを指定することで、Slack や Discord、Facebook などでウェブサイトを共有した際の見た目を変えることができます。
@@ -107,6 +183,23 @@ OGP (Open Graph Protocol) のタグを指定することで、Slack や Discord�
 https://web-toolbox.dev/tools/ogp-checker や https://develop.tools/ogp-simulator/ などの OGP チェッカーを使って動作確認できます。
 
 参考: [The Open Graph protocol](https://ogp.me/)
+
+例:
+    
+```html
+<title>長期プロジェクト | ut.code();</title>
+<meta name="description" content="ut.code(); で長期間にわたって開発を行っているプロジェクトです">
+<meta property="og:site_name" content="ut.code();">
+<meta property="og:title" content="長期プロジェクト">
+<meta property="og:description" content="ut.code(); で長期間にわたって開発を行っているプロジェクトです">
+<meta property="og:image" content="https://utcode.net/utcode-logo/normal.png">
+<meta property="og:url" content="https://utcode.net/projects/">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@utokyo_code">
+```
+
+![Slackでの表示例](./t2-meta/og_slack.png)
 
 ### og:title (必須)
 
@@ -140,20 +233,33 @@ https://web-toolbox.dev/tools/ogp-checker や https://develop.tools/ogp-simulato
 
 ### og:url (必須)
 
-ページの URL を指定します。
-同じページを指す複数の URL がある場合 (言語違い、PC 用とモバイル用、ページ内容に影響しないクエリパラメータなど) は統一した URL (canonical URL) を指定します。
+ページの canonical URL を指定します。
 Facebook ではいいね数の集計に使われるらしいです。
 それ以外のアプリで何に使われるのかは謎ですが必須となっています。
 
 ## Twitterカード
 
 Twitter (現在の X) でウェブサイトを共有した際の見た目を変えるためのプロトコルです。
-現在は以下に示す要素以外を OGP で代用できます。
+現在は twitter:card, site, creator 以外の要素は OGP で代用できます。
 Xカード とは呼びません。
 
-## robots
+```html title="index.html"
+<meta name="twitter:プロパティ名" content="内容">
+```
+の形式で指定します。
+(OGP とは異なり、`property` ではなく `name` で指定します)
 
-## sitemap
+参考: [カードの利用開始 | Docs | Twitter Developer Platform](https://developer.x.com/ja/docs/tweets/optimize-with-cards/guides/getting-started)
 
-## canocical / alternate
+### twitter:card (必須)
 
+Twitterカードの種類を指定します。
+`summary`, `summary_large_image`, `app`, `player` の4種類があり、通常は `summary_large_image` を指定します。
+
+### twitter:site
+
+このウェブサイトを運営している X アカウントを (`@` をつけて) 指定します。
+
+### twitter:creator
+
+このページのコンテンツの作者の X アカウントを (`@` をつけて) 指定します。
