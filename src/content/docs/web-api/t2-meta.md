@@ -229,6 +229,7 @@ https://web-toolbox.dev/tools/ogp-checker や https://develop.tools/ogp-simulato
 * og:image に指定するURLは https:// から始まる絶対 URL で指定する必要があります。
 * og:image を指定しなかった場合の動作はアプリの実装によります。
 参考:[LINEくん？OGPの設定をしてないのにOGが出るんだが？ | Qiita](https://qiita.com/Takayuki_Nakano/items/e87c2d4af20e0dbfdec5)
+* Twitter (現在の X), Discord で表示される画像サイズは twitter:card プロパティの設定によって変わります。
 :::
 
 ### og:url (必須)
@@ -255,6 +256,9 @@ Xカード とは呼びません。
 
 Twitterカードの種類を指定します。
 `summary`, `summary_large_image`, `app`, `player` の4種類があり、通常は `summary_large_image` を指定します。
+この指定によって X 上でプレビューの種類が変わります。
+
+また、Discord でもこの設定によってプレビューに表示される画像のサイズが変わるようです。
 
 ### twitter:site
 
