@@ -200,7 +200,7 @@ React では、副作用は何回実行しても結果が変わらないとい�
 では、二回目のリクエストをキャンセルする方法について学びましょう。
 [公式チュートリアル](https://react.dev/learn/synchronizing-with-effects#fetching-data)では、二回目に fetch したデータを無視する簡単なロジックを実装していますが、ここでは [AbortController](https://developer.mozilla.org/en-US/docs/Web/API/AbortController) を使う方法を以下に示します。
 
-```js {6, 14}
+```js {6, 9, 16}
 import { useEffect, useState } from "react";
 
 export default function App() {
@@ -208,9 +208,11 @@ export default function App() {
 	useEffect(() => {
 		const controller = new AbortController();
 		const fetchData = async () => {
-			fetch("https://jsonplaceholder.typicode.com/todos/1")
-				.then((response) => response.json())
-				.then((json) => setTitle(json.title));
+			const response = await fetch("https://jsonplaceholder.typicode.com/todos/1", {
+				signal: controller.signal
+			});
+			const json = await response.json();
+			setTitle(json.title);
 			console.log("json requested");
 		};
 		fetchData();

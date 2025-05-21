@@ -1,7 +1,11 @@
 {
   "name": "Sample App",
+  "short_name": "Sample",
   "start_url": "/",
+  "id": "/",
   "display": "standalone",
+  "theme_color": "#80ffff",
+  "background_color": "#ffff80",
   "icons": [
     {
       "src": "/icon_192.png",

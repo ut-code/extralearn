@@ -10,9 +10,13 @@ export default defineConfig({
     starlight({
       title: "Extra Learn",
       plugins: [starlightThemeRapidePlugin()],
-      social: {
-        github: "https://github.com/ut-code/extralearn",
-      },
+      social: [
+        {
+          icon: "github",
+          label: "GitHub",
+          href: "https://github.com/ut-code/extralearn",
+        },
+      ],
       sidebar: [
         {
           label: "中心概念",
@@ -41,6 +45,10 @@ export default defineConfig({
         {
           label: "マネジメント",
           autogenerate: { directory: "management" },
+        },
+        {
+          label: "その他 / 趣味置き場",
+          autogenerate: { directory: "utilities" },
         },
       ],
     }),
