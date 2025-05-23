@@ -156,7 +156,6 @@ app.get(
             onMessage(event, ws) {
                 const newMessage: Message = JSON.parse(event.data.toString());
                 messages.push(newMessage);
-                console.log(messages);
                 server.publish(chatRoom, JSON.stringify(messages));
             },
             onClose: (event, ws) => {
