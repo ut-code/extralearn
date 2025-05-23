@@ -79,7 +79,7 @@ export default {
 Bunでは、このPub/Subの仕組みを簡単に使えるAPIが用意されています。
 
 ## リアルタイムチャットアプリを作ってみよう
-ディレクトリ構成は先ほどのまま、ファイルを書き換えてみましょう。
+ディレクトリ構成は先ほどのまま、ファイルを書き換えてみましょう。以下のコードでは、あるタブで送信したメッセージが、他のタブにもリアルタイムで反映されます。
 ```svelte
 // /web/src/App.svelte
 <script lang="ts">
@@ -111,12 +111,8 @@ Bunでは、このPub/Subの仕組みを簡単に使えるAPIが用意されて�
 </ul>
 <input bind:value={newMessage} />
 <button
-  onclick={async () => {
-    await fetch("http://localhost:3000/message", {
-      method: "POST",
-      mode: "cors",
-      body: JSON.stringify({ text: newMessage }),
-    });
+  onclick={() => {
+    socket?.send(JSON.stringify({ text: newMessage }));
     newMessage = "";
   }}>send</button
 >
@@ -149,17 +145,6 @@ const server = Bun.serve({
 
 app.use("/*", cors());
 
-app.get("/", (c) => {
-    return c.text("Hello Hono");
-});
-
-app.post("/message", async (c) => {
-    const message: Message = await c.req.json();
-    messages.push(message);
-    server.publish(chatRoom, JSON.stringify(messages));
-    return c.text("hoge");
-});
-
 app.get(
     "/ws",
     upgradeWebSocket((c) => {
@@ -167,6 +152,12 @@ app.get(
             onOpen(event, ws) {
                 ws.raw?.subscribe(chatRoom);
                 ws.send(JSON.stringify(messages));
+            },
+            onMessage(event, ws) {
+                const newMessage: Message = JSON.parse(event.data.toString());
+                messages.push(newMessage);
+                console.log(messages);
+                server.publish(chatRoom, JSON.stringify(messages));
             },
             onClose: (event, ws) => {
                 ws.raw?.unsubscribe(chatRoom);
