@@ -90,8 +90,8 @@ Bunでは、このPub/Subの仕組みを簡単に使えるAPIが用意されて�
   };
 
   let socket: null | WebSocket = null;
-  let messages: Message[] = [];
-  let newMessage = "";
+  let messages: Message[] = $state([]);
+  let newMessage = $state("");
 
   onMount(() => {
     socket = new WebSocket("ws://localhost:3000/ws");
