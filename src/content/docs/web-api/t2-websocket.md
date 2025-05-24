@@ -14,7 +14,7 @@ ut.code(); Learn では ToDo アプリを通じてフルスタックアプリの
   import { onMount } from "svelte";
 
   let socket: null | WebSocket = null;
-  let message = "";
+  let message = $state("");
 
   onMount(() => {
     socket = new WebSocket("ws://localhost:3000/ws");
