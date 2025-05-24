@@ -9,7 +9,7 @@ ut.code(); Learn では ToDo アプリを通じてフルスタックアプリの
 ## 早速つなげてみよう
 フロントエンドは `bun create vite@latest web`、バックエンドは `bun create hono@latest server` でそれぞれのディレクトリを作成します。
 ```svelte
-// /web/src/App.svelte
+// web/src/App.svelte
 <script lang="ts">
   import { onMount } from "svelte";
 
@@ -31,7 +31,7 @@ ut.code(); Learn では ToDo アプリを通じてフルスタックアプリの
 <button onclick={() => socket?.send("hello from client")}>send</button>
 ```
 ```ts
-// /server/src/index.ts
+// server/src/index.ts
 import { Hono } from "hono"
 import { createBunWebSocket } from "hono/bun"
 import { type ServerWebSocket } from "bun"
@@ -81,7 +81,7 @@ Bunでは、このPub/Subの仕組みを簡単に使えるAPIが用意されて�
 ## リアルタイムチャットアプリを作ってみよう
 ディレクトリ構成は先ほどのまま、ファイルを書き換えてみましょう。以下のコードでは、あるタブで送信したメッセージが、他のタブにもリアルタイムで反映されます。
 ```svelte
-// /web/src/App.svelte
+// web/src/App.svelte
 <script lang="ts">
   import { onMount } from "svelte";
 
@@ -120,7 +120,7 @@ Bunでは、このPub/Subの仕組みを簡単に使えるAPIが用意されて�
 ```
 
 ```ts
-// /server/src/index.ts
+// server/src/index.ts
 import type { ServerWebSocket } from "bun";
 import { Hono } from "hono";
 import { createBunWebSocket } from "hono/bun";
