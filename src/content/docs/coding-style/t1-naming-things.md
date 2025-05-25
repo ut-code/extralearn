@@ -38,7 +38,7 @@ function calculateTax() {
 
 関数を変数として扱う場合はどちらでもよいので、しっくり来る方にしよう。
 
-```js
+```ts
 // callbackFn は関数だが名詞のほうが自然
 function sleep(ms: number, callbackFn: () => void) {
   setTimeout(() => {
