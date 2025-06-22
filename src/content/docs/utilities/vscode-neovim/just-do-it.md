@@ -11,7 +11,8 @@ Neovim は、キーボード操作を中心にした効率的なテキスト編�
 
 ## 早速使ってみよう
 ### インストール
-まず Neovim をインストールします。[GitHub](https://github.com/neovim/neovim/blob/master/INSTALL.md) を参照してください。ちなみに、筆者は WSL2 + Ubuntu 22.04 を使っているのですが、apt で配布されているバージョンが VSCode Neovim の要件に足りなかったので、AppImage からインストールしました。\
+まず Neovim をインストールします。[GitHub](https://github.com/neovim/neovim/blob/master/INSTALL.md) を参照してください。ちなみに、筆者は WSL2 + Ubuntu 22.04 を使っているのですが、apt で配布されているバージョンが VSCode Neovim の要件に足りなかったので、AppImage からインストールしました。
+
 次に、VSCode Neovim を VSCode 上でインストールします。ボタン押すだけですね。インストールが終わったら、歯車マークから Settings に進みます。`which nvim` で neovim の実行ファイルのパスを取得して、Neovim Exectable Paths として指定します。また、
 ```sh
 mkdir ~/.config/nvim
