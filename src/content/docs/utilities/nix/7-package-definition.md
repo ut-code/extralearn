@@ -2,13 +2,11 @@
 title: 7. Nix でパッケージを定義する
 ---
 
-Nix のパッケージを表すものとして、derivation というものがあります。
-
-(めんどくなったので、あとは勝手に調べてください。)
+Nix ではビルド単位を derivation と呼びます。ここでは最小のパッケージ定義を作って動かします。
 
 ## パッケージを記述する
 
-`stdenv.mkDerivation` というラッパーを使い、パッケージを記述しましょう。
+`stdenv.mkDerivation` を使って定義します。
 
 ```go title="main.go"
 package main
@@ -21,24 +19,21 @@ func main() {
 ```
 
 ```nix
-{pkgs ? import <nixpkgs> {}}: let
-  pname = "hello-nix";
-in
-  pkgs.stdenv.mkDerivation {
-    inherit pname;
-    version = "0.0.0";
-    src = ./.;
-    buildInputs = [pkgs.go];
-    buildPhase = ''
-      # キャッシュのディレクトリを設定する (気にしなくて良い)
-      export GOCACHE=/tmp/gocache
-      go build ./main.go
-    '';
-    installPhase = ''
-      mkdir -p $out/bin
-      mv ./main $out/bin/${pname}
-    '';
-  }
+{ pkgs ? import <nixpkgs> {} }:
+let pname = "hello-nix";
+in pkgs.stdenv.mkDerivation {
+  inherit pname;
+  version = "0.0.0";
+  src = ./.;
+  buildInputs = [ pkgs.go ];
+  buildPhase = ''
+    export GOCACHE=$TMPDIR/gocache
+    go build -o ${pname} ./main.go
+  '';
+  installPhase = ''
+    install -Dm755 ${pname} $out/bin/${pname}
+  '';
+}
 ```
 
 ビルドしてみましょう。
@@ -56,8 +51,7 @@ nix-build ./package.nix
 
 ## インストールしてみる
 
-今回は Nix シェルにインストールしますが、Home Manager や NixOS にも同様の手順でインストールできます。
-`pkgs.callPackage` は、他のファイルに記述した Nix 関数を呼び出すのに使えます。
+今回は Nix シェルに取り込みます。`pkgs.callPackage` でローカル定義を呼び出せます。
 
 ```nix title="shell.nix"
 {pkgs ? import <nixpkgs> {}}: let
@@ -79,8 +73,7 @@ hello-nix # `$out/bin` の中に作成したバイナリのファイル名で呼
 
 ## Flake にする
 
-このままだと、 `package.nix` とそのソースがローカルに存在しないと使えません。あまり便利ではないですね。
-Flake にして、 GitHub で全世界に配布してみましょう。
+Flake 化するとどこからでも参照できます。
 
 ```nix title="flake.nix"
 {
@@ -104,15 +97,10 @@ Flake にして、 GitHub で全世界に配布してみましょう。
 }
 ```
 
-これをコミットして、 リポジトリのルートにおいて GitHub の公開リポジトリにアップロードします。
-
-すると、任意の場所 (あなたのパソコンである必要もありません) から Flake を呼び出せるようになります。
-
+コミット・公開後は次のように実行できます。
 ```sh
-nix run github:$USER/$REPO # default を実行
+nix run github:$USER/$REPO           # default を実行
 nix run github:$USER/$REPO#hello-nix # hello-nix を実行
 ```
 
-ちなみに、この教材のリポジトリにも `hello-nix` をおいてあるので、 `nix run github:ut-code/extralearn` で hello-nix が実行できます。
-
-Cachix とかで、ビルド結果を共有キャッシュにすることもできるらしいです。(やったことない)
+共有キャッシュ (例: Cachix) を用意すればビルド時間を短縮できます。

@@ -4,19 +4,18 @@ title: 6. Home Manager を使う
 
 参照: [Home Manager Manual](https://nix-community.github.io/home-manager/)
 
-todo: 誰か動作確認して
+## セットアップ (単独利用)
 
-## Home Manager をセットアップする
-
+リリースブランチを指定して初期化します (例: 24.11)。
 ```sh
-nix run home-manager/master -- init --switch
+nix run home-manager/release-24.11 -- init --switch
 ```
 
-`~/.config/home-manager` に Home Manager のモジュールが生成されます。``
+`~/.config/home-manager` に設定が生成されます。
 
 ## パッケージをインストールする
 
-`~/.config/home-manager/home.nix` に、以下の行を追加してください。
+`~/.config/home-manager/home.nix` に追加します。
 
 ```nix
 {
@@ -32,11 +31,12 @@ nix run home-manager/master -- init --switch
 }
 ```
 
+反映:
 ```sh
 home-manager switch
 ```
 
-Home Manager がビルドを実行したあと、Nix 経由で Bun がインストールされます。
+Home Manager のビルド後、Nix 経由で Bun が利用可能になります。
 
 ```sh
 which bun
@@ -45,9 +45,7 @@ which bun
 
 ## モジュールを分割する
 
-Home Manager の設定ファイルが成長してくると、 `home.nix` だけでは大きくなりすぎてしまいます。
-
-複数ファイルに分割してみましょう。
+設定が大きくなったらファイルを分割して `imports` します。
 
 ```nix title="home.nix"
 {
@@ -71,8 +69,6 @@ Home Manager の設定ファイルが成長してくると、 `home.nix` だけ�
 }
 ```
 
-`imports` にインポートしたいモジュールを指定すると、モジュールがインポートされます。``
+`imports` にインポートしたいモジュールを列挙します。
 
-## カスタムモジュールを定義する
-
-HELP NEEDED: どうやってやるのこれ
+フレーク管理に移行する場合は、`~/.config/home-manager/flake.nix` を作成し、`homeConfigurations.${username}` を定義して `home-manager switch` を実行します。
