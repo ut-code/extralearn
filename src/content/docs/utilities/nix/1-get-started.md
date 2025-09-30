@@ -4,47 +4,27 @@ title: 1. Nix の目的と環境構築
 
 ## そもそも Nix とは？
 
-Nix は、一言でいうと、**ソフトウェアのパッケージ方法を定義する可搬な記述式**です。
+Nix は、ソフトウェアのビルドと実行環境を宣言的に記述し、再現可能に提供するためのツールチェーンです。
 
 ## Nix で何ができる？
 
-Nix (+ flakes) を使うと、以下のようなことの組み合わせが簡単に達成できます。
-
-(定義部分)
-
-- [nixpkgs](https://search.nixos.org) で定義されている大量のパッケージを利用する
-- ソフトウェアのビルド式を定義し、**誰でもビルドできる**ようにする
-  - 依存関係の明示化も Nix に強制されるので、必要な依存が見つからない！が起こり得ない
-- 任意の GitHub リポジトリの任意の ref を、 Flake が定義されている限り **手動でクローンせずに** 実行する。
-- 上のすべてを、**コミットハッシュ単位で**バージョンを固定して行う
-  - かつ、 1 コマンドでアップデート可能
-
-(利用部分)
-
-↑で定義したすべてのソフトウェアを使って、
-
-- 開発用シェルの定義を記述し、開発者の間で共有する (`shell.nix`, `devShell`)
-- ユーザースペースの定義、その方法の共有 (Home Manager, modules)
-  - ファイル (`.bashrc`など) や、ソフトウェアのインストールなど
-- OS の設定の一元的管理 (NixOS)
-  - ソフトウェアのインストールなど
+- Nixpkgs の大量のパッケージを再現可能に利用できる。
+- 自作ソフトのビルド式を記述し、誰でも同じ方法でビルドできる。
+- Flakes で依存をコミットハッシュにロックし、複数人・複数端末で同じ環境を共有できる。
+- 開発用シェル (`devShell`)・ユーザー設定 (Home Manager)・OS 設定 (NixOS) を一貫した記述で管理できる。
 
 ## 環境構築
 
 ### 1. Nix のインストール
 
-公式のインストーラー <https://nixos.org/download/>
+- 公式: https://nixos.org/download/
+- Determinate Systems: https://github.com/DeterminateSystems/nix-installer
 
-または、 Determinate Systems のインストーラー <https://github.com/DeterminateSystems/nix-installer>
-を利用してください。
+どちらも現在の Nix をインストールできます。Determinate 版はアンインストーラ付きで、`flakes`/`nix-command` をデフォルトで有効化します。
 
-Determinate Systems のインストーラーは、デフォルトで後述 (2.) の設定が ON になっていたり、アンインストーラーが付属したりしています。
+### 2. Nix CLI の設定 (必要な場合)
 
-チャンネル (後述) を聞かれた場合は、 `nixpkgs-unstable` を選択してください。
-
-### 2. Nix CLI の設定 (公式のインストーラー利用時)
-
-次のコマンドを実行 (するか、同等のことを) してください。
+新 CLI と Flakes を使うために、未設定なら有効化します。
 ```sh
 mkdir -p ~/.config/nix
 echo 'experimental-features = nix-command flake' > ~/.config/nix/nix.conf
@@ -52,8 +32,7 @@ echo 'experimental-features = nix-command flake' > ~/.config/nix/nix.conf
 
 ### 3. 確認
 
-次のコマンドを実行して、 `Hello, Nix!` と表示されたら成功です。
+次のコマンドを実行し、 `Hello, Nix!` と表示されれば成功です。
 ```sh
 nix run nixpkgs#hello -- --greeting 'Hello, Nix!'
 ```
-
