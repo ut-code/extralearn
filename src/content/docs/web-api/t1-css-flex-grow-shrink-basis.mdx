@@ -2,6 +2,14 @@
 title: CSS レイアウト (flex-grow, flex-shrink, flex-basis)
 ---
 
+import beforeVideo from "./t1-css-flex-grow-shrink-basis/before.mp4";
+import afterVideo from "./t1-css-flex-grow-shrink-basis/after.mp4";
+import grow111Video from "./t1-css-flex-grow-shrink-basis/grow-1-1-1.mp4";
+import grow012Video from "./t1-css-flex-grow-shrink-basis/grow-0-1-2.mp4";
+import basis100200300Video from "./t1-css-flex-grow-shrink-basis/basis-100-200-300.mp4";
+import shrink012Video from "./t1-css-flex-grow-shrink-basis/shrink-0-1-2.mp4";
+import shrink111Video from "./t1-css-flex-grow-shrink-basis/shrink-1-1-1.mp4";
+
 ut.code(); Learn「[CSS によるレイアウト](https://learn.utcode.net/docs/browser-apps/css-layout/)」に入りきらなかった内容として、`flex-grow`、`flex-shrink`、`flex-basis` について扱います。
 
 ## 前提
@@ -112,12 +120,11 @@ body {
 
 現在のところ、画面の幅を変えたときは次のような動作になっています。
 
-![初期状態の料金プランのカード](./t1-css-flex-grow-shrink-basis/before.gif)
+<video src={beforeVideo} controls muted autoPlay loop playsInline></video>
 
 しかし、少しぎこちないですね。願わくは、次のように画面幅に合わせてカードが伸縮するようになってほしいものです。
 
-![理想的な料金プランのカード](./t1-css-flex-grow-shrink-basis/after.gif)
-
+<video src={afterVideo} controls muted autoPlay loop playsInline></video>
 ## 概要
 
 「画面幅に合わせてカードを伸縮させる」ためにはどうすればいいでしょうか。
@@ -146,7 +153,7 @@ body {
 }
 ```
 
-![flex-growを1:1:1に設定した様子](./t1-css-flex-grow-shrink-basis/grow-1-1-1.gif)
+<video src={grow111Video} controls muted autoPlay loop playsInline></video>
 
 カードを広げることができました。
 
@@ -172,7 +179,7 @@ body {
 }
 ```
 
-![flex-growを0:1:2に設定した様子](./t1-css-flex-grow-shrink-basis/grow-0-1-2.gif)
+<video src={grow012Video} controls muted autoPlay loop playsInline></video>
 
 Free のカードには余ったスペースが分配されず、Basic と Premium のカードにはそれぞれ 1:2 の比率で余ったスペースが分配されていることがわかります。
 
@@ -203,7 +210,14 @@ Free のカードには余ったスペースが分配されず、Basic と Premi
 }
 ```
 
-![flex-basisを100px、200px、300pxに設定した様子](./t1-css-flex-grow-shrink-basis/basis-100-200-300.gif)
+<video
+  src={basis100200300Video}
+  controls
+  muted
+  autoPlay
+  loop
+  playsInline
+></video>
 
 初期のサイズは 100px、200px、300px であるものの、伸びていく比率は 1:1:1 であることが確認できます。
 
@@ -231,7 +245,7 @@ Free のカードには余ったスペースが分配されず、Basic と Premi
 }
 ```
 
-![flex-shrinkを0:1:2に設定した様子](./t1-css-flex-grow-shrink-basis/shrink-0-1-2.gif)
+<video src={shrink012Video} controls muted autoPlay loop playsInline></video>
 
 Free のカードは縮まず、Basic と Premium のカードはそれぞれ 1:2 の比率で縮んでいっていることがわかります。
 
@@ -239,7 +253,7 @@ Free のカードは縮まず、Basic と Premium のカードはそれぞれ 1:
 
 なお、このプロパティのデフォルト値は `1` なので、何も設定しなくてもスペースが不足した場合には勝手にアイテムが縮みます。
 
-![flex-shrinkを1:1:1に設定した様子](./t1-css-flex-grow-shrink-basis/shrink-1-1-1.gif)
+<video src={shrink111Video} controls muted autoPlay loop playsInline></video>
 
 注意すべき点として、実は `flex-shrink` の比率の計算方法は `flex-grow` とは異なります。`flex-grow` の場合は、単純に各アイテムの `flex-grow` の値の比で分配されました。しかし、`flex-shrink` の場合は、各アイテムの `flex-shrink` の値に **`flex-basis` (で指定されたサイズ) を掛けたもの** の比で分配されます。そのため、`flex-basis` で指定されたサイズが均等でない場合は、`flex-shrink` の値が同じであっても、縮み方が異なります。詳しくは、[flex-shrink と flex-basis の組み合わせ - 主軸方向のフレックスアイテムの比率の制御 - CSS | MDN](https://developer.mozilla.org/ja/docs/Web/CSS/Guides/Flexible_box_layout/Controlling_flex_item_ratios#flex-shrink_%E3%81%A8_flex-basis_%E3%81%AE%E7%B5%84%E3%81%BF%E5%90%88%E3%82%8F%E3%81%9B) を参照してください。
 
