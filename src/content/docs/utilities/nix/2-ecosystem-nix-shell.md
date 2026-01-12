@@ -1,17 +1,25 @@
 ---
-title: 2. エコシステムの全体像と Nix Shell
+title: 2. エコシステム概要と Nix Shell 基本
 ---
 
 ## Nix エコシステムの全体像
 
-多分分かるので、そのうち書く。
+- Nix: 純粋関数型のビルドシステム兼パッケージマネージャ
+- Nixpkgs: 全パッケージ定義集 (公式リポジトリ)
+  - NixOS: OS 設定を Nix で宣言的に管理する Linux ディストロ。 Nixpkgs に含まれる
+- Home Manager: ユーザー環境の宣言的管理
+
+### 用語説明
+- Nix Store: `/nix/store` 下の内容アドレス可能なビルド成果物置き場。
+- Channels: 旧来のパッケージ参照方式。
+- Flakes: 入力をロックして再現性を高める新方式。
 
 ## Nix Shell
 
-Nix CLI を使い、Nix Shell を作成してみましょう。
+一時シェルを作ります。
 
 ```sh
-nix-shell -p lolcat cowsay
+nix-shell -p cowsay lolcat
 ```
 
 `lolcat` と `cowsay` が利用できるシェルが作成され、そのシェルに入ります。
@@ -23,12 +31,10 @@ which lolcat
 # -> /nix/store/9qirzkmk1vlj7klw0mjwjkaxpqgh8jdy-lolcat-100.0.1/bin/lolcat
 ```
 
-ここで大事なのは、
+ポイント:
 
-- 実行可能ファイルのダウンロードはされている
-- グローバルの環境にインストールされているわけではない
-- `/nix/store` の中にパッケージのそのバージョン専用のディレクトリが作成されている
-  - `/nix/store` のことを `Nix Store` と呼ぶことがあります
+- プログラムはダウンロードされるが、グローバルには汚さない。
+- `/nix/store` にハッシュ付きパスとして配置される (Nix Store)。
 
 `lolcat` と `cowsay` を使ってみましょう。
 
@@ -48,14 +54,13 @@ which cowsay
 # -> which: no cowsay in (path)
 ```
 
-## パッケージキャッシュ
+## キャッシュとクリーンアップ
 
-Nix Store にパッケージのキャッシュが残っているので、次同じパッケージを使って `nix-shell` をすると、ダウンロードが発生しないのが確認できます。
+Nix Store にキャッシュが残るため、同じパッケージは再ダウンロードされません。
 
-このキャッシュを消去するには、
+キャッシュのクリーンアップは次のいずれかでできます。
 
 ```sh
+nix store gc
 nix-collect-garbage
 ```
-
-を実行します。

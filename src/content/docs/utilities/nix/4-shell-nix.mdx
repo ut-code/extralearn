@@ -20,9 +20,7 @@ title: 4. Nix ファイルで Nix Shell を定義し、自動で読み込む
 
 ## シェル定義ファイル
 
-### 動かしてみる
-
-まずはシェル定義ファイルを作成し、動かしてみましょう。詳しい構文は後で説明します。
+まずは最小の定義を作って動かします。
 
 ```nix title="shell.nix"
 let
@@ -38,7 +36,9 @@ in
 ```
 
 ```sh
-nix-shell ./shell.nix # ファイル名が与えられないとデフォルトで `shell.nix` を使うので、省略も可能
+nix-shell ./shell.nix  # 旧 CLI
+# または (Flake)
+# nix develop          # flake.nix がある場合
 
 hello --greeting 'Hello, Nix!'
 # -> Hello, Nix!
@@ -50,49 +50,10 @@ hello --greeting 'Hello, Nix!'
 # -> hello: command not found
 ```
 
-### 構文の説明
+### ポイント
 
-#### `import <nixpkgs> {}`
-
-主に `pkgs` という変数名にされる、 [Nixpkgs](https://github.com/NixOS/nixpkgs) のライブラリをすべて格納した Attrset に評価されます。これのことを Nixpkgs と呼ぶこともあります。
-
-ここに大量のプログラムと Nix の公式ライブラリ関数がすべて格納されています。
-
-本当はこれ以上分解できるのですが、難しいのでこの単位で捉えても構いません。
-一年くらい Nix してるとそのうちわかるかもしれませんね。
-
-<details>
-  <summary>詳しい説明</summary>
-  - `import`: パスを引数に取り、その場所にある Nix ファイルの中身に展開される builtin 関数。
-  - `{}`: 空の Attrset。 `import <nixpkgs>` はオプションを取って `pkgs` を返す関数になるので、すべてのオプションをデフォルトで呼び出す。
-
-  ---
-  
-  `<nixpkgs>` をさらに分解する
-
-  `<>` 構文: 間に挟まれた文字列に対応する Nix Path を、`$NIX_PATH` 環境変数などから探してくる構文。
-
-  `$NIX_PATH` は `key=URL` やチャンネル (たぶん後述) のパスを `:` で接続した形式になっている。 URL のスキームの区切り (例: `http:...`, `file:...`) にも `:` が使われるので、非常に紛らわしい。
-
-  ```sh title=bash
-  echo $NIX_PATH
-  # -> nixpkgs=flake:nixpkgs:/nix/var/nix/profiles/per-user/root/channels
-  # nixpkgs=flake:nixpkgs と /nix/var/nix/profiles/per-user/root/channels に分解できる。
-  ```
-
-  今回の場合は `nixpkgs=flake:nixpkgs` にマッチするので、どうなるんだろう？
-
-  最終的には、 `<nixpkgs>` は `/nix/store/(hash)-source` というパスになる。このパスの中身は、 `nixpkgs` のリポジトリのようだ。
-</details>
-
-#### `pkgs.mkShell {...}`
-
-Nixpkgs のライブラリ関数の一つで、シェルを表現する Attrset (Derivation と呼ばれる、たぶん後述) を返します。
-
-引数の Attrset のとるオプションには、以下が含まれます:
-
-- `packages`: シェルで使用可能にするパッケージのリスト。
-- `env`: 環境変数を表す Attrset。
+- `import <nixpkgs> {}` は Nixpkgs のパッケージ集合 (`pkgs`) を読み込みます。
+- `pkgs.mkShell { packages = [...] ; }` で必要ツールを含むシェルを作れます。
 
 ## Direnv を使って自動で Nix Shell に入る
 
@@ -104,15 +65,19 @@ Home-Manager や NixOS を使う予定の方は、先にそれらのセットア
 Home-Manager も NixOS も使う予定のない方は、このまま進んでください。
 :::
 
-1. Direnv をインストールします。 [https://direnv.net/docs/installation.html](https://direnv.net/docs/installation.html)
-  - Home Manager か NixOS のある方はそれでインストールしてください。
-2. Nix-Direnv をインストールします。 [https://github.com/nix-community/nix-direnv](https://github.com/nix-community/nix-direnv)
-  - Home Manager か NixOS のある方はそれを、ない方は「Install with `nix profile`」を選択してください。
+1. Direnv をインストール: https://direnv.net/docs/installation.html
+2. Nix-Direnv をセットアップ: https://github.com/nix-community/nix-direnv
 
 ### 自動で Nix シェルを読み込む
 
-Direnv は、 `.envrc` ファイルを使って設定します。まずは、 `.envrc` を作成しましょう。
+Direnv は `.envrc` で設定します。
 
+Flake あり:
+```txt title=".envrc"
+use flake
+```
+
+Flake なし:
 ```txt title=".envrc"
 use nix
 ```
@@ -123,7 +88,7 @@ Direnv に `direnv: error .envrc is blocked. Run direnv allow to approve its con
 direnv allow
 ```
 
-これで、そのディレクトリに入ったときに自動で Nix シェルが起動するようになりました。
+これでディレクトリ入場時に自動で Nix シェルが起動します。
 
 試しに、１個上のディレクトリと行き来してみましょう。
 
